@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Event Listener</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #f0f0f0;
+            padding-left: 50px;
+        }
+
+        .container {
+            text-align: center;
+            margin-right: 50px;
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .video {
+            border: 5px solid #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            width: 600px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .keys {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .key {
+            width: 70px;
+            height: 70px;
+            background-color: #ffffff;
+            border: 4px solid #cccccc;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #000000;
+        }
+
+        .key-border-flash {
+            animation: borderFlash 1.5s linear infinite;
+        }
+
+        @keyframes borderFlash {
+            0% {
+                border-color: #cccccc;
+            }
+
+            30% {
+                border-color: #ff0000;
+            }
+
+            70% {
+                border-color: #0000ff;
+            }
+
+            100% {
+                border-color: #ffff00;
+            }
+        }
+
+        .key.pressed {
+            background-color: #000000;
+            color: #f0f0f0;
+            border: 4px solid #cccccc;
+            animation: none;
+            font-size: 50px;
+        }
+
+        .info {
+            font-size: 24px;
+            margin-top: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 2px 2px #ff0000, -2px -2px #0000ff;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 60px;
+            margin-bottom: 26px;
+            margin-top: -50px;
+            font-family: 'Impact', Charcoal, sans-serif;
+            text-shadow: 4px 4px #ff0000, -4px -4px #0000ff;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 40px;
+            font-family: 'Impact', Charcoal, sans-serif;
+            text-shadow: 3px 3px #ff0000, -3px -3px #0000ff;
+            margin: 20px 0;
+        }
+
+        .video-title {
+            font-size: 24px;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 2px 2px #ff0000, -2px -2px #0000ff;
+            margin-bottom: 10px;
+        }
+
+        .cat-detection {
+            font-size: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .extra-space {
+            margin-top: 50px;
+        }
+
+        .response-container {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .response-container img {
+            max-width: 50%;
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const keys = ['w', 'a', 's', 'd', 'p'];
+            let keyStates = {};
+
+            keys.forEach((key, index) => {
+                setTimeout(() => {
+                    document.getElementById(key).classList.add('key-border-flash');
+                }, index * 500);
+            });
+
+            // control the car
+            document.addEventListener('keydown', (event) => {
+                let keyPressed = event.key.toLowerCase();
+
+                if (keys.includes(keyPressed) && !keyStates[keyPressed]) {
+                    keyStates[keyPressed] = true;
+                    document.getElementById(keyPressed).classList.add('pressed');
+
+                    let data = { key: keyPressed };
+
+                    fetch('http://172.25.103.245:5000/key', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Success:', data);
+                            if (keyPressed === 'p' && data.Image_URL) {
+                                let labObj = JSON.parse(data.response_text);
+                                let labValue = labObj.lab;
+                                document.getElementById('responseText').innerText = labValue;
+                                document.getElementById('responseImage').src = data.Image_URL;
+                                document.getElementById('responseImage').style.display = 'block';
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                let keyReleased = event.key.toLowerCase();
+
+                if (keys.includes(keyReleased)) {
+                    keyStates[keyReleased] = false;
+                    document.getElementById(keyReleased).classList.remove('pressed');
+                    if (keyReleased !== 'p') {
+                        let data = { key: 'q' };
+
+                        fetch('http://172.25.103.245:5000/key', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Success:', data);
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                    }
+                }
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Car Control Console</h1>
+        <div class="info">Press WASD to control the car. Press P to take a photo.</div>
+        <div class="keys">
+            <div class="row">
+                <div id="w" class="key">W</div>
+            </div>
+            <div class="row">
+                <div id="a" class="key">A</div>
+                <div id="s" class="key">S</div>
+                <div id="d" class="key">D</div>
+            </div>
+            <div class="row extra-space">
+                <div id="p" class="key">P</div>
+            </div>
+        </div>
+        <div class="response-container">
+            <div id="responseText" class="info" style="font-size: 28px;"></div>
+            <img id="responseImage" src="" style="display: none;" alt="Captured Image">
+        </div>
+    </div>
+    <div class="video-container">
+        <h2>Video</h2>
+        <div class="video">
+            <img src="http://172.25.103.245:9000/stream.mjpg" width="640" height="480" />
+        </div>
+    </div>
+</body>
+
+</html>
