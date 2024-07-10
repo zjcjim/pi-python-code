@@ -162,13 +162,15 @@
     </style>
     <script>
         var pi_ip = null;
+
         function fetchDeviceIP() {
-            fetch('http://124.71.164.229:5000/get_ips')
+            fetch('http://124.71.164.229:5000/get_ips') // 替换成你的服务器地址
                 .then(response => response.json())
                 .then(data => {
                     pi_ip = data['pi'];
                     if (pi_ip) {
                         console.log(`IP address for 'pi': ${pi_ip}`);
+                        // 设置视频流的 src 属性
                         document.querySelector('.video img').src = 'http://' + pi_ip + ':9000/stream.mjpg';
                     } else {
                         console.log(`'pi' device not found. Retrying...`);
@@ -181,9 +183,10 @@
                 });
         }
 
-        window.onload = fetchDeviceIP;
-
         document.addEventListener('DOMContentLoaded', (event) => {
+            // 在页面加载完成后调用获取设备 IP 的函数
+            fetchDeviceIP();
+
             const keys = ['w', 'a', 's', 'd', 'p'];
             let keyStates = {};
 
@@ -193,7 +196,7 @@
                 }, index * 500);
             });
 
-            // control the car
+            // 控制小车
             document.addEventListener('keydown', (event) => {
                 let keyPressed = event.key.toLowerCase();
 
@@ -283,7 +286,7 @@
     <div class="video-container">
         <h2>Video</h2>
         <div class="video">
-            <img src="http://172.25.103.245:9000/stream.mjpg" width="640" height="480" />
+            <img src="" width="640" height="480" />
         </div>
     </div>
 </body>
