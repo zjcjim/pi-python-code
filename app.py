@@ -3,6 +3,7 @@ from flask_cors import CORS
 import serial
 import requests
 import socket
+import time
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -30,15 +31,40 @@ def capture_image(server_url):
 
 server_url = "http://127.0.0.1:9000"
 
-backend_url = 'http://172.25.104.58:5000/receive_url'
+ip_server_url = 'http://124.71.164.229:5000'
 
-ip_server_url = 'http://服务器IP地址:5000/register'
-data = {'name': 'pi'}
+# register pi's ip address
+ip_register_url = ip_server_url + '/register'
+data = {'name': 'pi', 'ip': get_local_ip()}
 headers = {'Content-Type': 'application/json'}
 
-response = requests.post(url, json=data, headers=headers)
+response = requests.post(ip_register_url, json=data, headers=headers)
 print(response.json())
 
+# get backend's ip address
+ip_fetch_url = ip_server_url + '/get_ips'
+
+while True:
+    try:
+        response = requests.get(ip_fetch_url)
+        data = response.json()
+        if response.status_code == 200:
+            data = response.json()  # 将响应解析为JSON格式
+            # 提取设备名称为"pi"的IP地址
+            backend_ip = data.get("backend")
+            if backend_ip:
+                print(f"IP address of backend: {backend_ip}")
+                break  # 成功获取IP地址后退出循环
+            else:
+                print("Device 'backend' not found")
+        else:
+            print(f"Failed to fetch IPs, status code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred: {e}")
+
+    time.sleep(2)  # 等待2秒后重试
+
+backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 
