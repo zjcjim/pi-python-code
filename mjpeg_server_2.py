@@ -22,6 +22,21 @@ PAGE = """\
 </html>
 """
 
+def get_local_ip():
+    # 创建一个 UDP 套接字
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 尝试连接到一个外部的IP地址（这里用的是Google的DNS服务器地址）
+        # 实际上并不会真的连接，这只是用来获取本机IP地址
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        ip = "Unable to get IP"
+    finally:
+        s.close()
+    return ip
+
 class StreamingOutput(io.BufferedIOBase):
     def __init__(self):
         self.frame = None
@@ -98,7 +113,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/plain')
                 self.end_headers()
-                image_url = f"http://172.25.103.245:8000/{filename}"
+                image_url = f"http://" + get_local_ip() + ":8000/{filename}"
                 self.wfile.write(image_url.encode('utf-8'))
                 print(f"Image URL: {image_url}")
             else:
