@@ -4,6 +4,7 @@ import serial
 import requests
 import socket
 import time
+import json
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -100,6 +101,24 @@ def key_event():
     ser.write(key_pressed.encode('utf-8'))
 
     return jsonify({'message': 'Key received'})
+
+@app.route('/position', methods=['POST'])
+def position_event():
+    data = request.get_json()
+    position_x = data.get('x')
+    position_y = data.get('y')
+    if position_x is not None and position_y is not None:
+        if position_x > 0:
+            print('right')
+            ser.write('k'.encode('utf-8'))
+        elif position_x < 0:
+            print('left')
+            ser.write('j'.encode('utf-8'))
+        else:
+            print('position is zero')
+        return jsonify({'message': 'Position received'})
+    else:
+        return jsonify({'error': 'Position not provided'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
