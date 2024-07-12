@@ -5,6 +5,7 @@ import requests
 import socket
 import time
 import json
+import struct
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -29,6 +30,11 @@ def capture_image(server_url):
     else:
         print("Failed to capture image")
     return response.text
+
+def send_to_arduino(motor_speeds, servo_angle):
+    data = struct.pack('4i2f', *motor_speeds, *servo_angle)
+    ser.write(data)
+    print("Data send to Arduino: " + data)
 
 server_url = "http://127.0.0.1:9000"
 
@@ -63,11 +69,15 @@ while True:
     except requests.exceptions.RequestException as e:
         print(f"Error occurred: {e}")
 
-    time.sleep(2)  # 等待2秒后重试
+    time.sleep(1)  # 等待1秒后重试
 
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
-ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+# using 8E1
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1, parity=serial.PARITY_EVEN)
+
+motor_speeds = [0, 0, 0, 0]
+servo_angle = [0, 0]
 
 app = Flask(__name__)
 CORS(app)
@@ -77,16 +87,22 @@ def key_event():
     data = request.get_json()
     key_pressed = data.get('key')
     print(f'Key pressed: {key_pressed}')
+
     if(key_pressed=='w'):
         print('motor forward')
+        motor_speeds = [100, 100, 100, 100]
     elif(key_pressed=='s'):
         print('motor backward')
+        motor_speeds = [-100, -100, -100, -100]
     elif(key_pressed=='a'):
         print('motor turn left')
+        motor_speeds = [-100, 100, 100, -100]
     elif(key_pressed=='d'):
         print('motor turn right')
+        motor_speeds = [100, -100, -100, 100]
     elif(key_pressed=='q'):
         print('motor stop')
+        motor_speeds = [0, 0, 0, 0]
     elif(key_pressed=='p'):
         print('taking a photo')
         image_url = capture_image(server_url)
@@ -97,26 +113,21 @@ def key_event():
         print(response.text)
         return jsonify({'Image_URL': image_url, 'response_text': response.text})
 
-
-    ser.write(key_pressed.encode('utf-8'))
-
+    send_to_arduino(motor_speeds, servo_angle)
     return jsonify({'message': 'Key received'})
 
 @app.route('/position', methods=['POST'])
 def position_event():
     data = request.get_json()
-    position = data.get('position')
-    # position_x = data.get('x')
-    # position_y = data.get('y')
-    if position is not None:
-        if position > 0:
-            print('right')
-            ser.write('k'.encode('utf-8'))
-        elif position < 0:
-            print('left')
-            ser.write('j'.encode('utf-8'))
-        else:
-            print('position is zero')
+    position_x = data.get('position_x')
+    position_y = data.get('position_y')
+    position_x = float(position_x)
+    position_y = float(position_y)
+
+    if position_x is not None and position_y is not None:
+        servo_angle[0] = position_x
+        servo_angle[1] = position_y
+        send_to_arduino(motor_speeds, servo_angle)
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
