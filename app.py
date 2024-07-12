@@ -105,13 +105,14 @@ def key_event():
 @app.route('/position', methods=['POST'])
 def position_event():
     data = request.get_json()
-    position_x = data.get('x')
-    position_y = data.get('y')
-    if position_x is not None and position_y is not None:
-        if position_x > 0:
+    position = data.get('position')
+    # position_x = data.get('x')
+    # position_y = data.get('y')
+    if position is not None:
+        if position > 0:
             print('right')
             ser.write('k'.encode('utf-8'))
-        elif position_x < 0:
+        elif position < 0:
             print('left')
             ser.write('j'.encode('utf-8'))
         else:

@@ -164,7 +164,7 @@
         var pi_ip = null;
 
         function fetchDeviceIP() {
-            fetch('http://124.71.164.229:5000/get_ips') // 替换成你的服务器地址
+            fetch('http://124.71.164.229:5000/get_ips')
                 .then(response => response.json())
                 .then(data => {
                     pi_ip = data['pi'];
