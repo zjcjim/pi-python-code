@@ -22,6 +22,10 @@ def get_local_ip():
         s.close()
     return ip
 
+def motor_control(position_x):
+    motor_speed_initial = 150
+    max_speed_diff = 50
+    motor_speeds = [motor_speed_initial + position_x * max_speed_diff, motor_speed_initial - position_x * max_speed_diff, motor_speed_initial - position_x * max_speed_diff, motor_speed_initial + position_x * max_speed_diff]
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
@@ -127,6 +131,9 @@ def position_event():
     position_y = float(position_y)
 
     if position_x is not None and position_y is not None:
+        
+        motor_control(position_x)
+
         servo_angle[0] = int(90 * (position_x + 1))
         servo_angle[1] = int(90 * (position_y + 1))
         send_to_arduino(motor_speeds, servo_angle)
