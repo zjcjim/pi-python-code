@@ -1,3 +1,4 @@
+from concurrent.futures import thread
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import serial
@@ -166,5 +167,9 @@ def position_event():
 # def teardown(exception = None):
 #     reset_on_exit(exception)
 
+@app.before_request
+def before_request():
+    print("Request received at "+ str(time.time()))
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', threaded=True)
