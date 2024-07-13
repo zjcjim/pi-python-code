@@ -157,7 +157,7 @@ def reset_on_exit(exception = None):
     motor_speeds = [0, 0, 0, 0]
     servo_angle = [0.0, 0.0]
     send_to_arduino(motor_speeds, servo_angle)
-    ser.close()
+    # ser.close()
     print("Serial port closed")
     if exception:
         print(f"An exception occurred: {exception}")
