@@ -131,11 +131,14 @@ def position_event():
     position_y = float(position_y)
 
     if position_x is not None and position_y is not None:
-        
+
         motor_control(position_x)
 
-        servo_angle[0] = int(90 * (position_x + 1))
-        servo_angle[1] = int(90 * (position_y + 1))
+        reduced_coefficient = 0.2
+
+        servo_angle[0] = int(90 * (reduced_coefficient * position_x + 1))
+        servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
+        
         send_to_arduino(motor_speeds, servo_angle)
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
