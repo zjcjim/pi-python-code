@@ -150,10 +150,10 @@ def position_event():
 
         motor_control(position_x)
 
-        reduced_coefficient = 0.1
+        reduced_coefficient = 0.5
 
         servo_angle[0] = int(90 * (reduced_coefficient * (-position_x) + 1))
-        servo_angle[1] = int(90 * (reduced_coefficient * (-position_y) + 1))
+        servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
 
