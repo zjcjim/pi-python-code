@@ -86,6 +86,9 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
 
+# initialize the motor speeds and servo angles
+send_to_arduino(motor_speeds, servo_angle)
+
 app = Flask(__name__)
 CORS(app)
 
@@ -148,6 +151,20 @@ def position_event():
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
+    
+def reset_on_exit(exception = None):
+    print("Resetting motors to initial state")
+    motor_speeds = [0, 0, 0, 0]
+    servo_angle = [0.0, 0.0]
+    send_to_arduino(motor_speeds, servo_angle)
+    ser.close()
+    print("Serial port closed")
+    if exception:
+        print(f"An exception occurred: {exception}")
+
+@app.teardown_appcontext
+def teardown(exception = None):
+    reset_on_exit(exception)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
