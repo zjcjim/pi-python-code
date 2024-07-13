@@ -23,6 +23,7 @@ def get_local_ip():
     return ip
 
 def motor_control(position_x):
+    global motor_speeds
     motor_speed_initial = 150
     max_speed_diff = 50
     motor_speeds = [motor_speed_initial + position_x * max_speed_diff, motor_speed_initial - position_x * max_speed_diff, motor_speed_initial - position_x * max_speed_diff, motor_speed_initial + position_x * max_speed_diff]
