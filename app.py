@@ -138,7 +138,9 @@ def position_event():
 
         servo_angle[0] = int(90 * (reduced_coefficient * position_x + 1))
         servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
-        
+
+        print("motor speeds: " + str(motor_speeds))
+
         send_to_arduino(motor_speeds, servo_angle)
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
