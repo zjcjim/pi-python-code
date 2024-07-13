@@ -4,8 +4,6 @@ import serial
 import requests
 import socket
 import time
-import json
-import struct
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -128,11 +126,14 @@ def key_event():
 
 @app.route('/position', methods=['POST'])
 def position_event():
+    begin_time = time.time()
     data = request.get_json()
     position_x = data.get('position_x')
     position_y = data.get('position_y')
     position_x = float(position_x)
     position_y = float(position_y)
+    current_time = time.time()
+    print(f"Time taken to receive data: {current_time - begin_time}")
 
     if position_x is not None and position_y is not None:
 
