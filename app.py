@@ -126,14 +126,13 @@ def key_event():
 
 @app.route('/position', methods=['POST'])
 def position_event():
-    begin_time = time.time()
     data = request.get_json()
+    current_time = time.time()
+    print(f'Position received at {current_time}')
     position_x = data.get('position_x')
     position_y = data.get('position_y')
     position_x = float(position_x)
     position_y = float(position_y)
-    current_time = time.time()
-    print(f"Time taken to receive data: {current_time - begin_time}")
 
     if position_x is not None and position_y is not None:
 
