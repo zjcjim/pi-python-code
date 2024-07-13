@@ -153,19 +153,19 @@ def position_event():
     else:
         return jsonify({'error': 'Position not provided'}), 400
     
-def reset_on_exit(exception = None):
-    print("Resetting motors to initial state")
-    motor_speeds = [0, 0, 0, 0]
-    servo_angle = [90, 90]
-    send_to_arduino(motor_speeds, servo_angle)
-    # ser.close()
-    print("Serial port closed")
-    if exception:
-        print(f"An exception occurred: {exception}")
+# def reset_on_exit(exception = None):
+#     print("Resetting motors to initial state")
+#     motor_speeds = [0, 0, 0, 0]
+#     servo_angle = [90, 90]
+#     send_to_arduino(motor_speeds, servo_angle)
+#     # ser.close()
+#     print("Serial port closed")
+#     if exception:
+#         print(f"An exception occurred: {exception}")
 
-@app.teardown_appcontext
-def teardown(exception = None):
-    reset_on_exit(exception)
+# @app.teardown_appcontext
+# def teardown(exception = None):
+#     reset_on_exit(exception)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
