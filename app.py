@@ -81,7 +81,6 @@ while True:
 
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
-# using 8E1
 ser = serial.Serial('/dev/ttyACM0', 9600)
 
 motor_speeds = [0, 0, 0, 0]
@@ -139,7 +138,7 @@ def position_event():
 
         motor_control(position_x)
 
-        reduced_coefficient = 0.1
+        reduced_coefficient = 0.3
 
         servo_angle[0] = int(90 * (reduced_coefficient * (-position_x) + 1))
         servo_angle[1] = int(90 * (reduced_coefficient * (-position_y) + 1))
