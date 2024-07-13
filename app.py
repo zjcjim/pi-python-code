@@ -147,6 +147,8 @@ def position_event():
         print("motor speeds: " + str(motor_speeds))
 
         send_to_arduino(motor_speeds, servo_angle)
+        current_time = time.time()
+        print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
         return jsonify({'message': 'Position received'})
