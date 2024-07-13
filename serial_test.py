@@ -17,9 +17,12 @@ if __name__ == "__main__":
         servo1 = -50
         servo2 = 30
 
-        send = str(motor1) + " " + str(motor2) + " " + str(motor3) + " " + str(motor4) + " " + str(servo1) + " " + str(servo2)
+        send = str(motor1) + " " + str(motor2) + " " + str(motor3) + " " + str(motor4) + " " + str(servo1) + " " + str(servo2) + "\n"
         ser.write(send.encode("utf_8"))
 
         data = ser.readline()
         rtn = data.decode("utf-8").replace('\n','')
         print(rtn)
+
+        # magic number 0.05
+        time.sleep(0.05)

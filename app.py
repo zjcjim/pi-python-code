@@ -1,10 +1,10 @@
-from concurrent.futures import thread
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import serial
 import requests
 import socket
 import time
+import threading
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -35,10 +35,18 @@ def capture_image(server_url):
         print("Failed to capture image")
     return response.text
 
+start_time = time.time()
+end_time = time.time()
+
 def send_to_arduino(motor_speeds, servo_angle):
+    global start_time, end_time
     start_time = time.time()
-    check_sum = motor_speeds[0] + motor_speeds[1] + motor_speeds[2] + motor_speeds[3] + servo_angle[0] + servo_angle[1]
-    data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + " " + str(check_sum)
+    gap_time = start_time - end_time
+
+    # magic number 0.05
+    if gap_time < 0.05:
+        time.sleep(0.05 - gap_time)
+    data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + "\n"
     ser.write(data.encode("utf-8"))
     print("Data send to Arduino: " + str(data))
     feedback = ser.readline()
