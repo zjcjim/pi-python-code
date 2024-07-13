@@ -32,9 +32,11 @@ def capture_image(server_url):
     return response.text
 
 def send_to_arduino(motor_speeds, servo_angle):
-    data = struct.pack('4i2f', *motor_speeds, *servo_angle)
-    ser.write(data)
-    print("Data send to Arduino: " + data)
+    data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1])
+    ser.write(data.encode("utf-8"))
+    print("Data send to Arduino: " + str(data))
+    feedback = ser.readline()
+    print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
 
 server_url = "http://127.0.0.1:9000"
 
@@ -74,10 +76,10 @@ while True:
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
 # using 8E1
-ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1, parity=serial.PARITY_EVEN)
+ser = serial.Serial('/dev/ttyACM0', 9600)
 
 motor_speeds = [0, 0, 0, 0]
-servo_angle = [0, 0]
+servo_angle = [0.0, 0.0]
 
 app = Flask(__name__)
 CORS(app)
@@ -125,9 +127,11 @@ def position_event():
     position_y = float(position_y)
 
     if position_x is not None and position_y is not None:
-        servo_angle[0] = position_x
-        servo_angle[1] = position_y
+        servo_angle[0] = int(90 * (position_x + 1))
+        servo_angle[1] = int(90 * (position_y + 1))
         send_to_arduino(motor_speeds, servo_angle)
+        print("position_x: " + str(position_x))
+        print("position_y: " + str(position_y))
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
