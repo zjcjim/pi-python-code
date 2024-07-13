@@ -87,7 +87,7 @@ motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
 
 # initialize the motor speeds and servo angles
-send_to_arduino(motor_speeds, servo_angle)
+# send_to_arduino(motor_speeds, servo_angle)
 
 app = Flask(__name__)
 CORS(app)
