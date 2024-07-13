@@ -36,12 +36,15 @@ def capture_image(server_url):
     return response.text
 
 def send_to_arduino(motor_speeds, servo_angle):
+    start_time = time.time()
     check_sum = motor_speeds[0] + motor_speeds[1] + motor_speeds[2] + motor_speeds[3] + servo_angle[0] + servo_angle[1]
     data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + " " + str(check_sum)
     ser.write(data.encode("utf-8"))
     print("Data send to Arduino: " + str(data))
-    feedback = ser.readline()
-    print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
+    end_time = time.time()
+    print(f"Time taken to send data on serial: {end_time - start_time} seconds")
+    # feedback = ser.readline()
+    # print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
 
 server_url = "http://127.0.0.1:9000"
 
