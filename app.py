@@ -42,12 +42,6 @@ def send_to_arduino(motor_speeds, servo_angle):
     end_time = time.time()
     print(f"Time taken to send data on serial: {end_time - start_time} seconds")
 
-def periodic_send():
-    global motor_speeds, servo_angle
-    while True:
-        send_to_arduino(motor_speeds, servo_angle)
-        time.sleep(0.05)  # 每隔0.05秒发送一次
-
 server_url = "http://127.0.0.1:9000"
 
 ip_server_url = 'http://124.71.164.229:5000'
