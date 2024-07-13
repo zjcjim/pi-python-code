@@ -37,7 +37,8 @@ def capture_image(server_url):
     return response.text
 
 def send_to_arduino(motor_speeds, servo_angle):
-    data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1])
+    check_sum = motor_speeds[0] + motor_speeds[1] + motor_speeds[2] + motor_speeds[3] + servo_angle[0] + servo_angle[1]
+    data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + " " + str(check_sum)
     ser.write(data.encode("utf-8"))
     print("Data send to Arduino: " + str(data))
     feedback = ser.readline()
@@ -155,7 +156,7 @@ def position_event():
 def reset_on_exit(exception = None):
     print("Resetting motors to initial state")
     motor_speeds = [0, 0, 0, 0]
-    servo_angle = [0.0, 0.0]
+    servo_angle = [90, 90]
     send_to_arduino(motor_speeds, servo_angle)
     # ser.close()
     print("Serial port closed")
