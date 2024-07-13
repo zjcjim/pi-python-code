@@ -1,4 +1,4 @@
-from concurrent.futures import thread
+import threading
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import serial
@@ -7,11 +7,8 @@ import socket
 import time
 
 def get_local_ip():
-    # 创建一个 UDP 套接字
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # 尝试连接到一个外部的IP地址（这里用的是Google的DNS服务器地址）
-        # 实际上并不会真的连接，这只是用来获取本机IP地址
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
     except Exception as e:
@@ -46,6 +43,12 @@ def send_to_arduino(motor_speeds, servo_angle):
     end_time = time.time()
     print(f"Time taken to send data on serial: {end_time - start_time} seconds")
 
+def periodic_send():
+    global motor_speeds, servo_angle
+    while True:
+        send_to_arduino(motor_speeds, servo_angle)
+        time.sleep(0.05)  # 每隔0.05秒发送一次
+
 server_url = "http://127.0.0.1:9000"
 
 ip_server_url = 'http://124.71.164.229:5000'
@@ -66,12 +69,11 @@ while True:
         response = requests.get(ip_fetch_url)
         data = response.json()
         if response.status_code == 200:
-            data = response.json()  # 将响应解析为JSON格式
-            # 提取设备名称为"pi"的IP地址
+            data = response.json()
             backend_ip = data.get("backend")
             if backend_ip:
                 print(f"IP address of backend: {backend_ip}")
-                break  # 成功获取IP地址后退出循环
+                break
             else:
                 print("Device 'backend' not found")
         else:
@@ -79,7 +81,7 @@ while True:
     except requests.exceptions.RequestException as e:
         print(f"Error occurred: {e}")
 
-    time.sleep(1)  # 等待1秒后重试
+    time.sleep(1)
 
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
@@ -88,14 +90,12 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
 
-# initialize the motor speeds and servo angles
-# send_to_arduino(motor_speeds, servo_angle)
-
 app = Flask(__name__)
 CORS(app)
 
 @app.route('/key', methods=['POST'])
 def key_event():
+    global motor_speeds
     data = request.get_json()
     key_pressed = data.get('key')
     print(f'Key pressed: {key_pressed}')
@@ -125,11 +125,11 @@ def key_event():
         print(response.text)
         return jsonify({'Image_URL': image_url, 'response_text': response.text})
 
-    send_to_arduino(motor_speeds, servo_angle)
     return jsonify({'message': 'Key received'})
 
 @app.route('/position', methods=['POST'])
 def position_event():
+    global motor_speeds, servo_angle
     data = request.get_json()
     current_time = time.time()
     print(f'Position received at {current_time}')
@@ -139,17 +139,13 @@ def position_event():
     position_y = float(position_y)
 
     if position_x is not None and position_y is not None:
-
         motor_control(position_x)
-
         reduced_coefficient = 0.1
-
         servo_angle[0] = int(90 * (reduced_coefficient * (-position_x) + 1))
         servo_angle[1] = int(90 * (reduced_coefficient * (-position_y) + 1))
 
         print("motor speeds: " + str(motor_speeds))
 
-        send_to_arduino(motor_speeds, servo_angle)
         current_time = time.time()
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
@@ -157,24 +153,12 @@ def position_event():
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
-    
-# def reset_on_exit(exception = None):
-#     print("Resetting motors to initial state")
-#     motor_speeds = [0, 0, 0, 0]
-#     servo_angle = [90, 90]
-#     send_to_arduino(motor_speeds, servo_angle)
-#     # ser.close()
-#     print("Serial port closed")
-#     if exception:
-#         print(f"An exception occurred: {exception}")
-
-# @app.teardown_appcontext
-# def teardown(exception = None):
-#     reset_on_exit(exception)
 
 @app.before_request
 def before_request():
     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
+    # 启动定时发送数据的线程
     app.run(debug=True, host='0.0.0.0', threaded=True)
+    threading.Thread(target=periodic_send, daemon=True).start()
