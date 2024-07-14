@@ -145,6 +145,8 @@ previous_angle_x = 90
 last_error_x= 0
 last_error_y = 0
 
+PID_count = 0
+
 app = Flask(__name__)
 CORS(app)
 
@@ -186,7 +188,7 @@ def key_event():
 def position_event():
     data = request.get_json()
     current_time = time.time()
-    global previous_angle_x
+    global previous_angle_x, PID_count
 
     print(f'Position received at {current_time}')
 
@@ -204,7 +206,7 @@ def position_event():
 
         motor_control(position_x)
 
-        reduced_coefficient_y = 0.3
+        reduced_coefficient_y = 0.1
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
 
         print("target angle: " + str(x_length_to_arc + previous_angle_x))
@@ -215,9 +217,10 @@ def position_event():
         # servo_angle[0] = int(x_pid.fit_and_plot(1))
         #print("PID result: " + str(servo_angle[0]))
 
-        if(abs(x_length_to_arc) > 10):
-            servo_angle[0] = int((x_length_to_arc + previous_angle_x) * 0.8)
+        if PID_count < 20:
+            servo_angle[0] = int(x_length_to_arc * 0.5 + previous_angle_x)
             PID_Servo_Control(float(x_length_to_arc + previous_angle_x), 0)
+            PID_count += 1
         else:
             servo_angle[0] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), 0)
             
