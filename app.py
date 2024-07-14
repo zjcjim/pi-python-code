@@ -96,6 +96,7 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 
 motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
+previous_angle_x = 90
 
 # initialize the motor speeds and servo angles
 # send_to_arduino(motor_speeds, servo_angle)
@@ -141,12 +142,15 @@ def key_event():
 def position_event():
     data = request.get_json()
     current_time = time.time()
+    global previous_angle_x
+
     print(f'Position received at {current_time}')
 
     print("data: " + str(data))
     
     position_x = data.get('position_x')
     position_y = data.get('position_y')
+
     # a bug here
     position_x = float(position_x)
     position_y = float(position_y)
@@ -157,16 +161,19 @@ def position_event():
 
         reduced_coefficient = 0.1
         x_length_to_arc = math.atan2(position_x, 2.58) * 180 / math.pi
-        servo_angle[0] = int(0.8 * x_length_to_arc + 90)
+        servo_angle[0] = int(1 * x_length_to_arc + previous_angle_x)
         servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
-
+        previous_angle_x = servo_angle[0] if servo_angle[0] < 150 and servo_angle[0] > 30 else previous_angle_x
         send_to_arduino(motor_speeds, servo_angle)
         current_time = time.time()
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
+
+
+
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
