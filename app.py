@@ -40,7 +40,7 @@ class PositionPID(object):
         d_out = self.k_d * derivative
 
         # t 时刻pid输出
-        output = p_out + i_out + d_out
+        output = p_out + i_out + d_out + self.cur_val
 
         # 限制输出值
         if output > self._max:
@@ -52,7 +52,7 @@ class PositionPID(object):
         self.cur_val = output
         return self.cur_val
 
-    def fit_and_plot(self, count = 70):
+    def fit_and_plot(self, count = 1):
         """
         使用PID拟合setPoint
         """
@@ -223,8 +223,8 @@ def position_event():
         print("previous angle: " + str(previous_angle_x))
 
         # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
-        x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.2, 0.1, 0.01)
-        servo_angle[0] = int(x_pid.fit_and_plot(20))
+        x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.6, 0.01, 0.01)
+        servo_angle[0] = int(x_pid.fit_and_plot(1))
 
         print("PID result: " + str(servo_angle[0]))
 
