@@ -210,4 +210,4 @@ def before_request():
     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', threaded=True)
+    app.run(debug=True, host='0.0.0.0')
