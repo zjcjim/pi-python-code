@@ -63,19 +63,22 @@ def get_local_ip():
         s.close()
     return ip
 
-def motor_control(previous_angle_x):
+def motor_control(previous_angle_x, is_target_lost=False):
     global motor_speeds
     motor_speed_initial = 100
     max_speed_diff = 100
     regulared = previous_angle_x / 90 - 1
 
-    if abs(previous_angle_x - 90) > 20:
-        if previous_angle_x > 90:
-            motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
-        else:
-            motor_speeds = [int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff)]    
+    if is_target_lost:
+        motor_speeds = [0, 0, 0, 0]
     else:
-        motor_speeds = [100, 100, 100, 100]
+        if abs(previous_angle_x - 90) > 20:
+            if previous_angle_x > 90:
+                motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
+            else:
+                motor_speeds = [int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff)]    
+        else:
+            motor_speeds = [100, 100, 100, 100]
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
@@ -206,8 +209,11 @@ def position_event():
     
     position_x = data.get('position_x')
     position_y = data.get('position_y')
+    target_lost = data.get('target_lost')
+
     position_x = float(position_x)
     position_y = float(position_y)
+    is_target_lost = (target_lost.lower() == 'true')
 
     # a bug here
    #  position_x, position_y = PID_Servo_Control(position_x, position_y)
@@ -225,11 +231,6 @@ def position_event():
         print("target angle y: " + str(y_length_to_arc + previous_angle_y))
         print("previous angle y: " + str(previous_angle_y))
 
-        # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
-        # x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.6, 0.01, 0.01)
-        # servo_angle[0] = int(x_pid.fit_and_plot(1))
-        #print("PID result: " + str(servo_angle[0]))
-
         if PID_count < 20:
             servo_angle[0] = int(x_length_to_arc * 0.5 + previous_angle_x)
             servo_angle[1] = int(y_length_to_arc * 0.2 + previous_angle_y)
@@ -239,7 +240,6 @@ def position_event():
             servo_angle[0], servo_angle[1] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
 
         print("motor speeds: " + str(motor_speeds))
-        # previous_angle_x = servo_angle[0] if servo_angle[0] < 150 and servo_angle[0] > 30 else previous_angle_x
         
         if servo_angle[0] > 180:
             servo_angle[0] = 180
