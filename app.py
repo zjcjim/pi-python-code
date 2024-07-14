@@ -63,6 +63,34 @@ class PositionPID(object):
             outputs.append(self.calculate())
 
         return outputs[-1]
+    
+last_error_x= 0
+last_error_y = 0
+pid_X_P = 0
+pid_Y_P = 0
+def PID_Servo_Control(x, y):
+    global error_x, error_y, last_error_x, last_error_y, pid_X_P, pid_Y_P
+    # 下面开始pid算法：
+    # pid总公式：PID = Uk + KP*【E(k)-E(k-1)】 + KI*E(k) + KD*【E(k)-2E(k-1)+E(k-2)】 
+    # 这里只用到了p，所以公式为：P = Uk + KP*【E(k)-E(k-1)】
+    # uk:原值   E(k):当前误差   KP:比例系数   KI:积分系数   KD:微分系数
+    
+    # 使用PID（可以发现舵机云台运动比较稳定）
+    
+    # 1 获取误差(x和y方向)（分别计算距离x、y轴中点的误差）
+    error_x = x    # width:320
+    error_y = y   # height:240
+    
+    # 2 PID控制参数
+    pwm_x = error_x*0.3 + (error_x - last_error_x)*0.1
+    pwm_y = error_y*0.3 + (error_y - last_error_y)*0.1
+    # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
+
+    # 3 保存本次误差，以便下一次运算
+    last_error_x = error_x
+    last_error_y = error_y
+    # p(pid的p) = 原值 + p分量
+    return pwm_x,pwm_y
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -158,6 +186,9 @@ previous_angle_x = 90
 # initialize the motor speeds and servo angles
 # send_to_arduino(motor_speeds, servo_angle)
 
+last_error_x= 0
+last_error_y = 0
+
 app = Flask(__name__)
 CORS(app)
 
@@ -209,8 +240,7 @@ def position_event():
     position_y = data.get('position_y')
 
     # a bug here
-    position_x = float(position_x)
-    position_y = float(position_y)
+    position_x, position_y = PID_Servo_Control(position_x, position_y)
 
     if position_x is not None and position_y is not None:
 
@@ -223,11 +253,10 @@ def position_event():
         print("previous angle: " + str(previous_angle_x))
 
         # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
-        x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.6, 0.01, 0.01)
-        servo_angle[0] = int(x_pid.fit_and_plot(1))
-
-        print("PID result: " + str(servo_angle[0]))
-
+        # x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.6, 0.01, 0.01)
+        # servo_angle[0] = int(x_pid.fit_and_plot(1))
+        #print("PID result: " + str(servo_angle[0]))
+        servo_angle[0] = int(90 * (position_x + 1))
         servo_angle[1] = int(90 * (reduced_coefficient_y * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
@@ -243,7 +272,7 @@ def position_event():
         if servo_angle[1] < 0:
             servo_angle[1] = 0
 
-        previous_angle_x = servo_angle[0]
+        #previous_angle_x = servo_angle[0]
         
         send_to_arduino(motor_speeds, servo_angle)
         current_time = time.time()
