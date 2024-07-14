@@ -89,10 +89,10 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 20 <= abs(previous_angle_x - 90) <= 40:
             if previous_angle_x > 90:
                 # turn left
-                motor_speeds = [0, 140, 140, 0]
+                motor_speeds = [100, 255, 255, 100]
             else:
                 # turn right
-                motor_speeds = [140, 0, 0, 140]
+                motor_speeds = [255, 100, 100, 255]
         else:
             # go straight
             motor_speeds = [100, 100, 100, 100]
