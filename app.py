@@ -83,8 +83,10 @@ def motor_control(previous_angle_x, is_target_lost=False):
                 # turn left
                 motor_speeds = [0, 140, 140, 0]
             else:
+                # turn right
                 motor_speeds = [140, 0, 0, 140]
         else:
+            # go straight
             motor_speeds = [100, 100, 100, 100]
 
 def capture_image(server_url):
