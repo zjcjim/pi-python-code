@@ -6,6 +6,7 @@ import socket
 import time
 import threading
 import math
+import numpy as np
 
 class PositionPID(object):
     """位置式PID算法实现"""
@@ -49,6 +50,17 @@ class PositionPID(object):
         self._pre_error = error
         self.cur_val = output
         return self.cur_val
+    
+    def fit_and_plot(self, count = 200):
+        """
+        使用PID拟合setPoint
+        """
+        counts = np.arange(count)
+        outputs = []
+
+        for i in counts:
+            outputs.append(self.calculate())
+        return outputs[-1]
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -206,7 +218,9 @@ def position_event():
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
 
         # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
-        servo_angle[0] = int(PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 20, 0, 0.6, 0.005, 0.03).calculate())
+        x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 20, 0, 0.6, 0.005, 0.03)
+        servo_angle[0] = int(x_pid.fit_and_plot(20))
+        
         servo_angle[1] = int(90 * (reduced_coefficient_y * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
