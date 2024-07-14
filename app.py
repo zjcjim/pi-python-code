@@ -63,11 +63,19 @@ def get_local_ip():
         s.close()
     return ip
 
-def motor_control(position_x):
+def motor_control(previous_angle_x):
     global motor_speeds
-    motor_speed_initial = 150
-    max_speed_diff = 50
-    motor_speeds = [int(motor_speed_initial + position_x * max_speed_diff), int(motor_speed_initial - position_x * max_speed_diff), int(motor_speed_initial - position_x * max_speed_diff), int(motor_speed_initial + position_x * max_speed_diff)]
+    motor_speed_initial = 100
+    max_speed_diff = 100
+    regulared = previous_angle_x / 90 - 1
+
+    if abs(previous_angle_x - 90) > 20:
+        if previous_angle_x > 90:
+            motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
+        else:
+            motor_speeds = [int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff)]    
+    else:
+        motor_speeds = [100, 100, 100, 100]
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
@@ -206,10 +214,10 @@ def position_event():
 
     if position_x is not None and position_y is not None:
 
-        motor_control(position_x)
+        motor_control(previous_angle_x)
 
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
-        y_length_to_arc = -math.atan2(position_y, 6.26) * 180 / math.pi
+        y_length_to_arc = math.atan2(position_y, 6.26) * 180 / math.pi
 
         print("target angle x: " + str(x_length_to_arc + previous_angle_x))
         print("previous angle x: " + str(previous_angle_x))
