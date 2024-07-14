@@ -1,4 +1,3 @@
-from matplotlib.pylab import f
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import serial
@@ -202,7 +201,23 @@ def position_event():
     position_x = float(position_x)
     position_y = float(position_y)
 
-    # a bug here
+    # a bug hereimport struct
+import time
+import serial
+
+ser = serial.Serial('/dev/ttyACM0', 9600)
+
+if __name__ == "__main__":
+    while True:
+        motor1 = 10
+        motor2 = 20
+        motor3 = 30
+        motor4 = 40
+
+        servo1 = -50
+        servo2 = 30
+
+        send = str(motor1) + " " 
    #  position_x, position_y = PID_Servo_Control(position_x, position_y)
 
     if position_x is not None and position_y is not None:
