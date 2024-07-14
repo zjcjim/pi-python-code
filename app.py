@@ -79,20 +79,20 @@ def motor_control(previous_angle_x, is_target_lost=False):
     if is_target_lost:
         motor_speeds = [0, 0, 0, 0]
     else:
-        if abs(previous_angle_x - 90) > 40:
+        if abs(previous_angle_x - 90) > 60:
             if previous_angle_x > 90:
                 # turn left
                 motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
             else:
                 # turn right
                 motor_speeds = [int(motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial - regulared * max_speed_diff)]    
-        elif 20 <= abs(previous_angle_x - 90) <= 40:
+        elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speeds = [100, 255, 255, 100]
+                motor_speeds = [25, 140, 140, 25]
             else:
                 # turn right
-                motor_speeds = [255, 100, 100, 255]
+                motor_speeds = [140, 25, 25, 140]
         else:
             # go straight
             motor_speeds = [100, 100, 100, 100]
@@ -234,6 +234,7 @@ def position_event():
 
     if position_x is not None and position_y is not None:
 
+
         motor_control(previous_angle_x, is_target_lost)
 
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
@@ -255,10 +256,11 @@ def position_event():
 
         print("motor speeds: " + str(motor_speeds))
         
-        if servo_angle[0] > 180:
-            servo_angle[0] = 180
-        if servo_angle[0] < 0:
-            servo_angle[0] = 0
+        # reset servo
+        if servo_angle[0] >= 150:
+            servo_angle[0] = 120
+        if servo_angle[0] <= 30:
+            servo_angle[0] = 60
 
         if servo_angle[1] > 180:
             servo_angle[1] = 180
