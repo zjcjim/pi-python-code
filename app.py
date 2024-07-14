@@ -1,3 +1,4 @@
+from matplotlib.pylab import f
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import serial
@@ -46,7 +47,7 @@ def PID_Servo_Control(x, y):
     pid_x += pwm_x
     pid_y += pwm_y
     # p(pid的p) = 原值 + p分量
-    return int(pid_x)
+    return int(pid_x), int(pid_y)
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -137,7 +138,9 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 
 motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
+
 previous_angle_x = 90
+previous_angle_y = 90
 
 # initialize the motor speeds and servo angles
 # send_to_arduino(motor_speeds, servo_angle)
@@ -188,7 +191,7 @@ def key_event():
 def position_event():
     data = request.get_json()
     current_time = time.time()
-    global previous_angle_x, PID_count
+    global previous_angle_x, previous_angle_y, PID_count
 
     print(f'Position received at {current_time}')
 
@@ -206,11 +209,14 @@ def position_event():
 
         motor_control(position_x)
 
-        reduced_coefficient_y = 0.1
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
+        y_length_to_arc = -math.atan2(position_y, 6.26) * 180 / math.pi
 
-        print("target angle: " + str(x_length_to_arc + previous_angle_x))
-        print("previous angle: " + str(previous_angle_x))
+        print("target angle x: " + str(x_length_to_arc + previous_angle_x))
+        print("previous angle x: " + str(previous_angle_x))
+
+        print("target angle y: " + str(y_length_to_arc + previous_angle_y))
+        print("previous angle y: " + str(previous_angle_y))
 
         # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
         # x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.6, 0.01, 0.01)
@@ -219,35 +225,33 @@ def position_event():
 
         if PID_count < 20:
             servo_angle[0] = int(x_length_to_arc * 0.5 + previous_angle_x)
-            PID_Servo_Control(float(x_length_to_arc + previous_angle_x), 0)
+            servo_angle[1] = int(y_length_to_arc * 0.2 + previous_angle_y)
+            PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
             PID_count += 1
         else:
-            servo_angle[0] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), 0)
-            
-        servo_angle[1] = int(90 * (reduced_coefficient_y * position_y + 1))
+            servo_angle[0], servo_angle[1] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
 
         print("motor speeds: " + str(motor_speeds))
         # previous_angle_x = servo_angle[0] if servo_angle[0] < 150 and servo_angle[0] > 30 else previous_angle_x
         
-
         if servo_angle[0] > 180:
             servo_angle[0] = 180
         if servo_angle[0] < 0:
             servo_angle[0] = 0
+
         if servo_angle[1] > 180:
             servo_angle[1] = 180
         if servo_angle[1] < 0:
             servo_angle[1] = 0
 
         previous_angle_x = servo_angle[0]
+        previous_angle_y = servo_angle[1]
         
         send_to_arduino(motor_speeds, servo_angle)
         current_time = time.time()
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
-
-
 
         return jsonify({'message': 'Position received'})
     else:
