@@ -165,7 +165,20 @@ def position_event():
         servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
-        previous_angle_x = servo_angle[0] if servo_angle[0] < 150 and servo_angle[0] > 30 else previous_angle_x
+        # previous_angle_x = servo_angle[0] if servo_angle[0] < 150 and servo_angle[0] > 30 else previous_angle_x
+        
+
+        if servo_angle[0] > 180:
+            servo_angle[0] = 180
+        if servo_angle[0] < 0:
+            servo_angle[0] = 0
+        if servo_angle[1] > 180:
+            servo_angle[1] = 180
+        if servo_angle[1] < 0:
+            servo_angle[1] = 0
+
+        previous_angle_x = servo_angle[0]
+        
         send_to_arduino(motor_speeds, servo_angle)
         current_time = time.time()
         print(f'send to arduino at {current_time}')
