@@ -7,6 +7,7 @@ import time
 import threading
 import math
 import numpy as np
+import os
 
     
 last_error_x= 0
@@ -18,6 +19,13 @@ pid_y = 0
 
 error_x = 0
 error_y = 0
+
+def getCPUtemperature():
+    cmd = os.popen('vcgencmd measure_temp').readline()
+    CPU_TEMP = cmd.replace("temp=","Temp:").replace("'C\n","C")
+    temp = float(cmd.replace("temp=","").replace("'C\n",""))
+    print(CPU_TEMP)
+    return temp
 
 def PID_Servo_Control(x, y):
     global error_x, error_y, last_error_x, last_error_y, previous_x, previous_y,pid_x,pid_y
@@ -265,6 +273,7 @@ def position_event():
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
+        getCPUtemperature()
 
         return jsonify({'message': 'Position received'})
     else:
