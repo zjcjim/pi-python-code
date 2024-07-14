@@ -11,7 +11,8 @@ import numpy as np
 class PositionPID(object):
     """位置式PID算法实现"""
 
-    def __init__(self, target, cur_val, max, min, p, i, d) -> None:
+    def __init__(self, target, cur_val, dt, max, min, p, i, d) -> None:
+        self.dt = dt  # 循环时间间隔
         self._max = max  # 最大输出限制，规避过冲
         self._min = min  # 最小输出限制
         self.k_p = p  # 比例系数
@@ -32,10 +33,10 @@ class PositionPID(object):
         # 比例项
         p_out = self.k_p * error  
         # 积分项
-        self._integral += (error)
+        self._integral += (error * self.dt)
         i_out = self.k_i * self._integral
         # 微分项
-        derivative = (error - self._pre_error)
+        derivative = (error - self._pre_error) / self.dt
         d_out = self.k_d * derivative
 
         # t 时刻pid输出
@@ -50,8 +51,8 @@ class PositionPID(object):
         self._pre_error = error
         self.cur_val = output
         return self.cur_val
-    
-    def fit_and_plot(self, count = 200):
+
+    def fit_and_plot(self, count = 70):
         """
         使用PID拟合setPoint
         """
@@ -60,6 +61,7 @@ class PositionPID(object):
 
         for i in counts:
             outputs.append(self.calculate())
+
         return outputs[-1]
 
 def get_local_ip():
@@ -221,7 +223,7 @@ def position_event():
         print("previous angle: " + str(previous_angle_x))
 
         # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
-        x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 20, 0, 0.6, 0.005, 0.03)
+        x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.2, 0.1, 0.01)
         servo_angle[0] = int(x_pid.fit_and_plot(20))
 
         print("PID result: " + str(servo_angle[0]))
