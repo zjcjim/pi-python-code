@@ -141,8 +141,12 @@ def position_event():
     data = request.get_json()
     current_time = time.time()
     print(f'Position received at {current_time}')
+
+    print("data: " + str(data))
+    
     position_x = data.get('position_x')
     position_y = data.get('position_y')
+    # a bug here
     position_x = float(position_x)
     position_y = float(position_y)
 
