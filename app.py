@@ -217,10 +217,15 @@ def position_event():
         reduced_coefficient_y = 0.3
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
 
+        print("target angle: " + str(x_length_to_arc + previous_angle_x))
+        print("previous angle: " + str(previous_angle_x))
+
         # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
         x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 20, 0, 0.6, 0.005, 0.03)
         servo_angle[0] = int(x_pid.fit_and_plot(20))
-        
+
+        print("PID result: " + str(servo_angle[0]))
+
         servo_angle[1] = int(90 * (reduced_coefficient_y * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
