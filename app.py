@@ -160,7 +160,7 @@ def position_event():
         motor_control(position_x)
 
         reduced_coefficient = 0.1
-        x_length_to_arc = math.atan2(position_x, 2.58) * 180 / math.pi
+        x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
         servo_angle[0] = int(1 * x_length_to_arc + previous_angle_x)
         servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
 
