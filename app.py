@@ -35,8 +35,8 @@ def PID_Servo_Control(x, y):
     previous_x = x
     previous_y = y
     # 2 PID控制参数
-    pwm_x =error_x * 0.6 #+ (error_x - last_error_x)*0.5
-    pwm_y =error_y * 0.6 #+ (error_y - last_error_y)*0.5
+    pwm_x = error_x * 0.3 #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * 0.3 #+ (error_y - last_error_y)*0.5
     # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
 
     # 3 保存本次误差，以便下一次运算
@@ -69,11 +69,19 @@ def motor_control(previous_angle_x):
     max_speed_diff = 100
     regulared = previous_angle_x / 90 - 1
 
-    if abs(previous_angle_x - 90) > 20:
+    if abs(previous_angle_x - 90) > 40:
         if previous_angle_x > 90:
+            # turn left
             motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
         else:
-            motor_speeds = [int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff)]    
+            # turn right
+            motor_speeds = [int(motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial - regulared * max_speed_diff)]    
+    elif 20 <= abs(previous_angle_x - 90) <= 40:
+        if previous_angle_x > 90:
+            # turn left
+            motor_speeds = [0, 140, 140, 0]
+        else:
+            motor_speeds = [140, 0, 0, 140]
     else:
         motor_speeds = [100, 100, 100, 100]
 
