@@ -70,6 +70,10 @@ previous_x = 0
 previous_y = 0
 pid_x = 0
 pid_y = 0
+
+error_x = 0
+error_y = 0
+
 def PID_Servo_Control(x, y):
     global error_x, error_y, last_error_x, last_error_y, previous_x, previous_y,pid_x,pid_y
     # 下面开始pid算法：
@@ -97,7 +101,7 @@ def PID_Servo_Control(x, y):
     pid_x += pwm_x
     pid_y += pwm_y
     # p(pid的p) = 原值 + p分量
-    return pid_x
+    return int(pid_x)
 
 def get_local_ip():
     # 创建一个 UDP 套接字
@@ -245,9 +249,11 @@ def position_event():
     
     position_x = data.get('position_x')
     position_y = data.get('position_y')
+    position_x = float(position_x)
+    position_y = float(position_y)
 
     # a bug here
-    position_x, position_y = PID_Servo_Control(position_x, position_y)
+   #  position_x, position_y = PID_Servo_Control(position_x, position_y)
 
     if position_x is not None and position_y is not None:
 
@@ -263,7 +269,7 @@ def position_event():
         # x_pid = PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 0.5, x_length_to_arc + previous_angle_x, 0, 0.6, 0.01, 0.01)
         # servo_angle[0] = int(x_pid.fit_and_plot(1))
         #print("PID result: " + str(servo_angle[0]))
-        servo_angle[0] = PID_Servo_Control(x_length_to_arc + previous_angle_x, 0)
+        servo_angle[0] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), 0)
         servo_angle[1] = int(90 * (reduced_coefficient_y * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
