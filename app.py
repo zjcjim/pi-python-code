@@ -7,6 +7,49 @@ import time
 import threading
 import math
 
+class PositionPID(object):
+    """位置式PID算法实现"""
+
+    def __init__(self, target, cur_val, max, min, p, i, d) -> None:
+        self._max = max  # 最大输出限制，规避过冲
+        self._min = min  # 最小输出限制
+        self.k_p = p  # 比例系数
+        self.k_i = i  # 积分系数
+        self.k_d = d  # 微分系数
+
+        self.target = target  # 目标值
+        self.cur_val = cur_val  # 算法当前PID位置值，第一次为设定的初始位置
+        self._pre_error = 0  # t-1 时刻误差值
+        self._integral = 0  # 误差积分值
+
+
+    def calculate(self):
+        """
+        计算t时刻PID输出值cur_val
+        """
+        error = self.target - self.cur_val  # 计算当前误差
+        # 比例项
+        p_out = self.k_p * error  
+        # 积分项
+        self._integral += (error)
+        i_out = self.k_i * self._integral
+        # 微分项
+        derivative = (error - self._pre_error)
+        d_out = self.k_d * derivative
+
+        # t 时刻pid输出
+        output = p_out + i_out + d_out
+
+        # 限制输出值
+        if output > self._max:
+            output = self._max
+        elif output < self._min:
+            output = self._min
+        
+        self._pre_error = error
+        self.cur_val = output
+        return self.cur_val
+
 def get_local_ip():
     # 创建一个 UDP 套接字
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -159,10 +202,12 @@ def position_event():
 
         motor_control(position_x)
 
-        reduced_coefficient = 0.1
+        reduced_coefficient_y = 0.3
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
-        servo_angle[0] = int(1 * x_length_to_arc + previous_angle_x)
-        servo_angle[1] = int(90 * (reduced_coefficient * position_y + 1))
+
+        # servo_angle[0] = int(x_length_to_arc + previous_angle_x)
+        servo_angle[0] = int(PositionPID(x_length_to_arc + previous_angle_x, previous_angle_x, 20, 0, 0.6, 0.005, 0.03).calculate())
+        servo_angle[1] = int(90 * (reduced_coefficient_y * position_y + 1))
 
         print("motor speeds: " + str(motor_speeds))
         # previous_angle_x = servo_angle[0] if servo_angle[0] < 150 and servo_angle[0] > 30 else previous_angle_x
