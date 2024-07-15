@@ -36,10 +36,11 @@ PID_count = 0
 target_lost_counter = 0
 target_found_counter = 0
 
-def motor_speed_smoothing(target_motor_speeds):
+def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     global motor_speeds
+
     diff = [x - y for x, y in zip(target_motor_speeds, motor_speeds)]
-    smoothed_diff = [1 / ((i / 30) ** 2 + 1) for i in diff]
+    smoothed_diff = [1 / ((i / smoothing_factor) ** 2 + 1) for i in diff]
     motor_speeds = [x + y for x, y in zip(motor_speeds, smoothed_diff)]
 
 def getCPUtemperature():
@@ -105,13 +106,13 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40])
+                motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40], 100)
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150])
+                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 100)
         else:
             # go straight
-            motor_speed_smoothing([100, 100, 100, 100])
+            motor_speed_smoothing([100, 100, 100, 100], 30)
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
