@@ -38,10 +38,13 @@ target_found_counter = 0
 
 def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     global motor_speeds
-
+    print("Processing speed smoothing...")
+    print("Current motor speeds: ", motor_speeds)
+    print("Target motor speeds: ", target_motor_speeds)
     diff = [x - y for x, y in zip(target_motor_speeds, motor_speeds)]
     smoothed_diff = [1 / ((i / smoothing_factor) ** 2 + 1) for i in diff]
     motor_speeds = [x + y for x, y in zip(motor_speeds, smoothed_diff)]
+    print("Smoothed motor speeds: ", motor_speeds)
 
 def getCPUtemperature():
     cmd = os.popen('vcgencmd measure_temp').readline()
@@ -106,10 +109,10 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40], 100)
+                motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40], 1)
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 100)
+                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 1)
         else:
             # go straight
             motor_speed_smoothing([100, 100, 100, 100], 30)
@@ -257,7 +260,7 @@ def position_event():
         else:
             servo_angle[0], servo_angle[1] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
 
-        print("motor speeds: " + str(motor_speeds))
+        # print("motor speeds: " + str(motor_speeds))
         
         # reset servo
         if servo_angle[0] >= 150:
