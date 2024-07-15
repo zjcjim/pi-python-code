@@ -1,10 +1,60 @@
-import threading
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import serial
 import requests
 import socket
 import time
+import threading
+import math
+import numpy as np
+import os
+
+    
+last_error_x= 0
+last_error_y = 0
+previous_x = 0
+previous_y = 0
+pid_x = 0
+pid_y = 0
+
+error_x = 0
+error_y = 0
+
+def getCPUtemperature():
+    cmd = os.popen('vcgencmd measure_temp').readline()
+    CPU_TEMP = cmd.replace("temp=","Temp:").replace("'C\n","C")
+    temp = float(cmd.replace("temp=","").replace("'C\n",""))
+    print(CPU_TEMP)
+    return temp
+
+def PID_Servo_Control(x, y):
+    global error_x, error_y, last_error_x, last_error_y, previous_x, previous_y,pid_x,pid_y
+    # 下面开始pid算法：
+    # pid总公式：PID = Uk + KP*【E(k)-E(k-1)】 + KI*E(k) + KD*【E(k)-2E(k-1)+E(k-2)】 
+    # 这里只用到了p，所以公式为：P = Uk + KP*【E(k)-E(k-1)】
+    # uk:原值   E(k):当前误差   KP:比例系数   KI:积分系数   KD:微分系数
+    
+    # 使用PID（可以发现舵机云台运动比较稳定）
+    
+    # 1 获取误差(x和y方向)（分别计算距离x、y轴中点的误差）
+    error_x = x - pid_x     # width:320
+    error_y = y - pid_y # height:240
+    
+    previous_x = x
+    previous_y = y
+    # 2 PID控制参数
+    pwm_x = error_x * 0.3 #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * 0.3 #+ (error_y - last_error_y)*0.5
+    # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
+
+    # 3 保存本次误差，以便下一次运算
+    last_error_x = error_x
+    last_error_y = error_y
+    
+    pid_x += pwm_x
+    pid_y += pwm_y
+    # p(pid的p) = 原值 + p分量
+    return int(pid_x), int(pid_y)
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -18,11 +68,31 @@ def get_local_ip():
         s.close()
     return ip
 
-def motor_control(position_x):
+def motor_control(previous_angle_x, is_target_lost=False):
     global motor_speeds
-    motor_speed_initial = 150
-    max_speed_diff = 50
-    motor_speeds = [int(motor_speed_initial + position_x * max_speed_diff), int(motor_speed_initial - position_x * max_speed_diff), int(motor_speed_initial - position_x * max_speed_diff), int(motor_speed_initial + position_x * max_speed_diff)]
+    motor_speed_initial = 100
+    max_speed_diff = 100
+    regulared = previous_angle_x / 90 - 1
+    if is_target_lost:
+        motor_speeds = [0, 0, 0, 0]
+    else:
+        if abs(previous_angle_x - 90) > 60:
+            if previous_angle_x > 90:
+                # turn left
+                motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
+            else:
+                # turn right
+                motor_speeds = [int(motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial - regulared * max_speed_diff)]    
+        elif 10 <= abs(previous_angle_x - 90) <= 60:
+            if previous_angle_x > 90:
+                # turn left
+                motor_speeds = [25, 140, 140, 25]
+            else:
+                # turn right
+                motor_speeds = [140, 25, 25, 140]
+        else:
+            # go straight
+            motor_speeds = [100, 100, 100, 100]
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
@@ -32,8 +102,18 @@ def capture_image(server_url):
         print("Failed to capture image")
     return response.text
 
+start_time = time.time()
+end_time = time.time()
+
 def send_to_arduino(motor_speeds, servo_angle):
+    global start_time, end_time
     start_time = time.time()
+    gap_time = start_time - end_time
+
+    # magic number 0.05
+    if gap_time < 0.05:
+        time.sleep(0.05 - gap_time)
+
     data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + "\n"
     ser.write(data.encode("utf-8"))
     print("Data send to Arduino: " + str(data))
@@ -83,6 +163,17 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
 
+previous_angle_x = 90
+previous_angle_y = 90
+
+# initialize the motor speeds and servo angles
+# send_to_arduino(motor_speeds, servo_angle)
+
+last_error_x= 0
+last_error_y = 0
+
+PID_count = 0
+
 app = Flask(__name__)
 CORS(app)
 
@@ -125,24 +216,65 @@ def position_event():
     global motor_speeds, servo_angle
     data = request.get_json()
     current_time = time.time()
+    global previous_angle_x, previous_angle_y, PID_count
+
     print(f'Position received at {current_time}')
+
+    print("data: " + str(data))
+    
     position_x = data.get('position_x')
     position_y = data.get('position_y')
+    target_lost = data.get('target_lost')
+
     position_x = float(position_x)
     position_y = float(position_y)
+    is_target_lost = (target_lost.lower() == 'true')
 
     if position_x is not None and position_y is not None:
-        motor_control(position_x)
-        reduced_coefficient = 0.1
-        servo_angle[0] = int(90 * (reduced_coefficient * (-position_x) + 1))
-        servo_angle[1] = int(90 * (reduced_coefficient * (-position_y) + 1))
+
+        motor_control(previous_angle_x, is_target_lost)
+
+        x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
+        y_length_to_arc = math.atan2(position_y, 6.26) * 180 / math.pi
+
+        print("target angle x: " + str(x_length_to_arc + previous_angle_x))
+        print("previous angle x: " + str(previous_angle_x))
+
+        print("target angle y: " + str(y_length_to_arc + previous_angle_y))
+        print("previous angle y: " + str(previous_angle_y))
+
+        if PID_count < 20:
+            servo_angle[0] = int(x_length_to_arc * 0.5 + previous_angle_x)
+            servo_angle[1] = int(y_length_to_arc * 0.2 + previous_angle_y)
+            PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
+            PID_count += 1
+        else:
+            servo_angle[0], servo_angle[1] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
 
         print("motor speeds: " + str(motor_speeds))
+        
+        # reset servo
+        if servo_angle[0] >= 150:
+            servo_angle[0] = 120
+        if servo_angle[0] <= 30:
+            servo_angle[0] = 60
+
+        if servo_angle[1] > 180:
+            servo_angle[1] = 180
+        if servo_angle[1] < 0:
+            servo_angle[1] = 0
+
+        previous_angle_x = servo_angle[0]
+        previous_angle_y = servo_angle[1]
+        
+        send_to_arduino(motor_speeds, servo_angle)
 
         current_time = time.time()
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
+        getCPUtemperature()
+
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
@@ -152,6 +284,4 @@ def before_request():
     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
-    # 启动定时发送数据的线程
-    app.run(debug=True, host='0.0.0.0', threaded=True)
-    threading.Thread(target=periodic_send, daemon=True).start()
+    app.run(debug=True, host='0.0.0.0')

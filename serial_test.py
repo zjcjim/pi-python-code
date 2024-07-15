@@ -22,4 +22,6 @@ if __name__ == "__main__":
         data = ser.readline()
         rtn = data.decode("utf-8").replace('\n','')
         print(rtn)
+        
+        # magic number 0.05
         time.sleep(0.05)
