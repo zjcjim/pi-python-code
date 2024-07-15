@@ -38,9 +38,9 @@ target_found_counter = 0
 
 def motor_speed_smoothing(target_motor_speeds):
     global motor_speeds
-    diff = [target_motor_speeds[i] - motor_speeds[i] for i in range(4)]
+    diff = [x - y for x, y in zip(target_motor_speeds, motor_speeds)]
     smoothed_diff = [1 / ((i / 30) ** 2 + 1) for i in diff]
-    motor_speeds = [motor_speeds[i] + smoothed_diff[i] for i in range(4)]
+    motor_speeds = [x + y for x, y in zip(motor_speeds, smoothed_diff)]
 
 def getCPUtemperature():
     cmd = os.popen('vcgencmd measure_temp').readline()
