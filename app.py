@@ -42,8 +42,8 @@ def PID_Servo_Control(x, y):
     previous_x = x
     previous_y = y
     # 2 PID控制参数
-    pwm_x = error_x * 0.3 #+ (error_x - last_error_x)*0.5
-    pwm_y = error_y * 0.3 #+ (error_y - last_error_y)*0.5
+    pwm_x = error_x * 0.6 #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * 0.6 #+ (error_y - last_error_y)*0.5
     # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
 
     # 3 保存本次误差，以便下一次运算
@@ -254,9 +254,9 @@ def position_event():
         
         # reset servo
         if servo_angle[0] >= 150:
-            servo_angle[0] = 120
+            servo_angle[0] = 150
         if servo_angle[0] <= 30:
-            servo_angle[0] = 60
+            servo_angle[0] = 30
 
         if servo_angle[1] > 180:
             servo_angle[1] = 180
@@ -268,10 +268,10 @@ def position_event():
 
         # override motor_control when target is found again
         if target_lost_counter < 6 and is_target_lost == False:
-            if position_x < 0:
-                motor_speeds = [68 + 14 * target_lost_counter, 5 * target_lost_counter, 5 * target_lost_counter, 68 + 14 * target_lost_counter]
+            if position_x > 0:
+                motor_speeds = [68 + 14 * target_lost_counter, 8 * target_lost_counter, 8 * target_lost_counter, 68 + 14 * target_lost_counter]
             else:
-                motor_speeds = [5 * target_lost_counter, 68 + 14 * target_lost_counter, 68 + 14 * target_lost_counter, 5 * target_lost_counter]
+                motor_speeds = [8 * target_lost_counter, 68 + 14 * target_lost_counter, 68 + 14 * target_lost_counter, 8 * target_lost_counter]
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
