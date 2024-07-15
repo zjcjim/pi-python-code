@@ -4,7 +4,6 @@ import serial
 import requests
 import socket
 import time
-import threading
 import math
 import numpy as np
 import os
@@ -77,19 +76,15 @@ def motor_control(previous_angle_x, is_target_lost=False):
         motor_speeds = [0, 0, 0, 0]
     else:
         if abs(previous_angle_x - 90) > 60:
-            if previous_angle_x > 90:
-                # turn left
-                motor_speeds = [int(-motor_speed_initial - regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial - regulared * max_speed_diff)]
-            else:
-                # turn right
-                motor_speeds = [int(motor_speed_initial - regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(-motor_speed_initial + regulared * max_speed_diff), int(motor_speed_initial - regulared * max_speed_diff)]    
+            motor_speeds = [0, 0, 0, 0]
+                 
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speeds = [25, 140, 140, 25]
+                motor_speeds = [50, 140, 140, 50]
             else:
                 # turn right
-                motor_speeds = [140, 25, 25, 140]
+                motor_speeds = [140, 50, 50, 140]
         else:
             # go straight
             motor_speeds = [100, 100, 100, 100]
