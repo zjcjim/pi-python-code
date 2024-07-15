@@ -170,8 +170,8 @@ last_error_y = 0
 
 PID_count = 0
 
-target_lost_counter = 0
-target_found_counter = 0
+previous_lost_time = 0
+previous_found_time = 0
 
 app = Flask(__name__)
 CORS(app)
@@ -212,7 +212,7 @@ def key_event():
 
 @app.route('/position', methods=['POST'])
 def position_event():
-    global motor_speeds, servo_angle, target_lost_counter, target_found_counter
+    global motor_speeds, servo_angle, previous_lost_time, previous_found_time
     data = request.get_json()
     current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
@@ -267,17 +267,21 @@ def position_event():
         previous_angle_y = servo_angle[1]
 
         # override motor_control when target is found again
-        if target_lost_counter < 5 and is_target_lost == False:
+        if current_time - previous_found_time < 1 and is_target_lost == False:
             motor_speeds = [0, 0, 0, 0]
-            target_lost_counter += 1
-            target_found_counter = 0
-        elif target_found_counter < 5 and is_target_lost == True:
-            target_found_counter += 1
-            target_lost_counter = 0
+        # elif current_time - previous_lost_time < 1 and is_target_lost == True:
+        #     target_found_counter += 1
+        #     target_lost_counter = 0
 
         send_to_arduino(motor_speeds, servo_angle)
 
         current_time = time.time()
+
+        if is_target_lost:
+            previous_lost_time = current_time
+        else:
+            previous_found_time = current_time
+
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
         print("position_y: " + str(position_y))
