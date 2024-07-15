@@ -105,13 +105,13 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speeds = motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40])
+                motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40])
             else:
                 # turn right
-                motor_speeds = motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150])
+                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150])
         else:
             # go straight
-            motor_speeds = motor_speed_smoothing([100, 100, 100, 100])
+            motor_speed_smoothing([100, 100, 100, 100])
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
