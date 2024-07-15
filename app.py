@@ -133,7 +133,7 @@ def send_to_arduino(motor_speeds, servo_angle):
     if gap_time < 0.05:
         time.sleep(0.05 - gap_time)
 
-    data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + "\n"
+    data = str(int(motor_speeds[0])) + " " + str(int(motor_speeds[1])) + " " + str(int(motor_speeds[2])) + " " + str(int(motor_speeds[3])) + " " + str(int(servo_angle[0])) + " " + str(int(servo_angle[1])) + "\n"
     ser.write(data.encode("utf-8"))
     print("Data send to Arduino: " + str(data))
     feedback = ser.readline()
