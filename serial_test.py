@@ -1,6 +1,5 @@
 # data structure: "(int)MA(int)MB(int)MC(int)MD(float)SA(float)SB"
 
-
 import struct
 import time
 import serial
@@ -19,10 +18,10 @@ if __name__ == "__main__":
 
         send = str(motor1) + " " + str(motor2) + " " + str(motor3) + " " + str(motor4) + " " + str(servo1) + " " + str(servo2) + "\n"
         ser.write(send.encode("utf_8"))
-
+        
         data = ser.readline()
         rtn = data.decode("utf-8").replace('\n','')
         print(rtn)
-
+        
         # magic number 0.05
         time.sleep(0.05)

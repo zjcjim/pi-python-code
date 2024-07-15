@@ -57,11 +57,8 @@ def PID_Servo_Control(x, y):
     return int(pid_x), int(pid_y)
 
 def get_local_ip():
-    # 创建一个 UDP 套接字
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # 尝试连接到一个外部的IP地址（这里用的是Google的DNS服务器地址）
-        # 实际上并不会真的连接，这只是用来获取本机IP地址
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
     except Exception as e:
@@ -116,6 +113,7 @@ def send_to_arduino(motor_speeds, servo_angle):
     # magic number 0.05
     if gap_time < 0.05:
         time.sleep(0.05 - gap_time)
+
     data = str(motor_speeds[0]) + " " + str(motor_speeds[1]) + " " + str(motor_speeds[2]) + " " + str(motor_speeds[3]) + " " + str(servo_angle[0]) + " " + str(servo_angle[1]) + "\n"
     ser.write(data.encode("utf-8"))
     print("Data send to Arduino: " + str(data))
@@ -144,12 +142,11 @@ while True:
         response = requests.get(ip_fetch_url)
         data = response.json()
         if response.status_code == 200:
-            data = response.json()  # 将响应解析为JSON格式
-            # 提取设备名称为"pi"的IP地址
+            data = response.json()
             backend_ip = data.get("backend")
             if backend_ip:
                 print(f"IP address of backend: {backend_ip}")
-                break  # 成功获取IP地址后退出循环
+                break
             else:
                 print("Device 'backend' not found")
         else:
@@ -157,7 +154,7 @@ while True:
     except requests.exceptions.RequestException as e:
         print(f"Error occurred: {e}")
 
-    time.sleep(1)  # 等待1秒后重试
+    time.sleep(1)
 
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
@@ -182,6 +179,7 @@ CORS(app)
 
 @app.route('/key', methods=['POST'])
 def key_event():
+    global motor_speeds
     data = request.get_json()
     key_pressed = data.get('key')
     print(f'Key pressed: {key_pressed}')
@@ -211,11 +209,11 @@ def key_event():
         print(response.text)
         return jsonify({'Image_URL': image_url, 'response_text': response.text})
 
-    send_to_arduino(motor_speeds, servo_angle)
     return jsonify({'message': 'Key received'})
 
 @app.route('/position', methods=['POST'])
 def position_event():
+    global motor_speeds, servo_angle
     data = request.get_json()
     current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
@@ -233,7 +231,6 @@ def position_event():
     is_target_lost = (target_lost.lower() == 'true')
 
     if position_x is not None and position_y is not None:
-
 
         motor_control(previous_angle_x, is_target_lost)
 
@@ -271,6 +268,7 @@ def position_event():
         previous_angle_y = servo_angle[1]
         
         send_to_arduino(motor_speeds, servo_angle)
+
         current_time = time.time()
         print(f'send to arduino at {current_time}')
         print("position_x: " + str(position_x))
@@ -280,20 +278,6 @@ def position_event():
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
-    
-# def reset_on_exit(exception = None):
-#     print("Resetting motors to initial state")
-#     motor_speeds = [0, 0, 0, 0]
-#     servo_angle = [90, 90]
-#     send_to_arduino(motor_speeds, servo_angle)
-#     # ser.close()
-#     print("Serial port closed")
-#     if exception:
-#         print(f"An exception occurred: {exception}")
-
-# @app.teardown_appcontext
-# def teardown(exception = None):
-#     reset_on_exit(exception)
 
 @app.before_request
 def before_request():
