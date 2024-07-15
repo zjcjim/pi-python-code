@@ -69,8 +69,8 @@ def PID_Servo_Control(x, y):
     previous_x = x
     previous_y = y
     # 2 PID控制参数
-    pwm_x = error_x * 0.6 #+ (error_x - last_error_x)*0.5
-    pwm_y = error_y * 0.6 #+ (error_y - last_error_y)*0.5
+    pwm_x = error_x * 0.8 #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * 0.8 #+ (error_y - last_error_y)*0.5
     # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
 
     # 3 保存本次误差，以便下一次运算
@@ -109,10 +109,13 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40], 60)
+                # add a coefficent
+                motor_speed_smoothing([30, speed_diff * 1.2 + 150, speed_diff * 1.2 + 150, 30], 120)
+                print("Turning left")
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 60)
+                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 80)
+                print("Turning right")
         else:
             # go straight
             motor_speed_smoothing([100, 100, 100, 100], 60)
