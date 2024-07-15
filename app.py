@@ -282,9 +282,11 @@ def position_event():
         # override motor_control when target is found again
         if target_lost_counter < 6 and is_target_lost == False:
             if position_x > 0:
-                motor_speeds = [68 + 14 * target_lost_counter, 8 * target_lost_counter, 8 * target_lost_counter, 68 + 14 * target_lost_counter]
+                # turn right
+                motor_speed_smoothing([50 + 14 * target_lost_counter, 8 * target_lost_counter, 8 * target_lost_counter, 50 + 14 * target_lost_counter], 110)
             else:
-                motor_speeds = [8 * target_lost_counter, 68 + 14 * target_lost_counter, 68 + 14 * target_lost_counter, 8 * target_lost_counter]
+                # turn left
+                motor_speed_smoothing([8 * target_lost_counter, 60 + 14 * target_lost_counter, 68 + 14 * target_lost_counter, 8 * target_lost_counter], 140)
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
