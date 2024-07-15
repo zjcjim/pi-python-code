@@ -70,8 +70,9 @@ def get_local_ip():
 def motor_control(previous_angle_x, is_target_lost=False):
     global motor_speeds
     motor_speed_initial = 100
-    max_speed_diff = 100
+    speed_diff = abs(previous_angle_x - 90)
     regulared = previous_angle_x / 90 - 1
+
     if is_target_lost:
         motor_speeds = [0, 0, 0, 0]
     else:
@@ -81,10 +82,10 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speeds = [50, 140, 140, 50]
+                motor_speeds = [40, speed_diff + 150, speed_diff + 150, 40]
             else:
                 # turn right
-                motor_speeds = [140, 50, 50, 140]
+                motor_speeds = [speed_diff + 150, 40, 40, speed_diff + 150]
         else:
             # go straight
             motor_speeds = [100, 100, 100, 100]
@@ -169,6 +170,8 @@ last_error_y = 0
 
 PID_count = 0
 
+target_lost_counter = 0
+
 app = Flask(__name__)
 CORS(app)
 
@@ -208,7 +211,7 @@ def key_event():
 
 @app.route('/position', methods=['POST'])
 def position_event():
-    global motor_speeds, servo_angle
+    global motor_speeds, servo_angle, target_lost_counter
     data = request.get_json()
     current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
@@ -261,7 +264,14 @@ def position_event():
 
         previous_angle_x = servo_angle[0]
         previous_angle_y = servo_angle[1]
-        
+
+        # override motor_control when target is found again
+        if target_lost_counter < 60 and is_target_lost == False:
+            motor_speeds = [0, 0, 0, 0]
+            target_lost_counter += 1
+        elif is_target_lost == True:
+            target_lost_counter = 0
+
         send_to_arduino(motor_speeds, servo_angle)
 
         current_time = time.time()
