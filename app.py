@@ -19,6 +19,29 @@ pid_y = 0
 error_x = 0
 error_y = 0
 
+motor_speeds = [0, 0, 0, 0]
+servo_angle = [0.0, 0.0]
+
+previous_angle_x = 90
+previous_angle_y = 90
+
+# initialize the motor speeds and servo angles
+# send_to_arduino(motor_speeds, servo_angle)
+
+last_error_x= 0
+last_error_y = 0
+
+PID_count = 0
+
+target_lost_counter = 0
+target_found_counter = 0
+
+def motor_speed_smoothing(target_motor_speeds):
+    global motor_speeds
+    diff = [target_motor_speeds[i] - motor_speeds[i] for i in range(4)]
+    smoothed_diff = [1 / ((i / 30) ** 2 + 1) for i in diff]
+    motor_speeds = [motor_speeds[i] + smoothed_diff[i] for i in range(4)]
+
 def getCPUtemperature():
     cmd = os.popen('vcgencmd measure_temp').readline()
     CPU_TEMP = cmd.replace("temp=","Temp:").replace("'C\n","C")
@@ -82,13 +105,13 @@ def motor_control(previous_angle_x, is_target_lost=False):
         elif 10 <= abs(previous_angle_x - 90) <= 60:
             if previous_angle_x > 90:
                 # turn left
-                motor_speeds = [40, speed_diff + 150, speed_diff + 150, 40]
+                motor_speeds = motor_speed_smoothing([40, speed_diff + 150, speed_diff + 150, 40])
             else:
                 # turn right
-                motor_speeds = [speed_diff + 150, 40, 40, speed_diff + 150]
+                motor_speeds = motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150])
         else:
             # go straight
-            motor_speeds = [100, 100, 100, 100]
+            motor_speeds = motor_speed_smoothing([100, 100, 100, 100])
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
@@ -155,23 +178,6 @@ while True:
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
 ser = serial.Serial('/dev/ttyACM0', 9600)
-
-motor_speeds = [0, 0, 0, 0]
-servo_angle = [0.0, 0.0]
-
-previous_angle_x = 90
-previous_angle_y = 90
-
-# initialize the motor speeds and servo angles
-# send_to_arduino(motor_speeds, servo_angle)
-
-last_error_x= 0
-last_error_y = 0
-
-PID_count = 0
-
-target_lost_counter = 0
-target_found_counter = 0
 
 app = Flask(__name__)
 CORS(app)
