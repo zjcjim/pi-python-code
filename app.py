@@ -267,11 +267,11 @@ def position_event():
         previous_angle_y = servo_angle[1]
 
         # override motor_control when target is found again
-        if target_lost_counter < 60 and is_target_lost == False:
+        if target_lost_counter < 5 and is_target_lost == False:
             motor_speeds = [0, 0, 0, 0]
             target_lost_counter += 1
             target_found_counter = 0
-        elif target_found_counter < 60 and is_target_lost == True:
+        elif target_found_counter < 5 and is_target_lost == True:
             target_found_counter += 1
             target_lost_counter = 0
 
