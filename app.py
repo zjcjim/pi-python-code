@@ -151,7 +151,7 @@ def send_to_arduino(motor_speeds, servo_angle):
     data = str(int(motor_speeds[0])) + " " + str(int(motor_speeds[1])) + " " + str(int(motor_speeds[2])) + " " + str(int(motor_speeds[3])) + " " + str(int(servo_angle[0])) + " " + str(int(servo_angle[1])) + "\n"
     ser.write(data.encode("utf-8"))
     # print("Data send to Arduino: " + str(data))
-    # feedback = ser.readline()
+    feedback = ser.readline()
     # print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
     end_time = time.time()
     # print(f"Time taken to send data on serial: {end_time - start_time} seconds")
