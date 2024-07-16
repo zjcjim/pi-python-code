@@ -5,8 +5,8 @@ import requests
 import socket
 import time
 import math
-import numpy as np
 import os
+import logging
 
     
 last_error_x= 0
@@ -178,6 +178,8 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 
 app = Flask(__name__)
 CORS(app)
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 @app.route('/key', methods=['POST'])
 def key_event():
@@ -317,4 +319,4 @@ def position_event():
 #     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(host='0.0.0.0')
