@@ -7,6 +7,9 @@ import time
 import math
 import os
 import logging
+import threading
+import subprocess
+import signal
 
     
 last_error_x= 0
@@ -29,6 +32,21 @@ PID_count = 0
 
 target_lost_counter = 0
 target_found_counter = 0
+
+def start_video_server():
+    subprocess.run(["python3", "mjpeg_server_2.py"])
+
+def shutdown_server(signal, frame):
+    print("Shutting down server...")
+    video_server_thread.join(1)
+
+    if ser.is_open:
+        ser.close()
+
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
 def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     global motor_speeds
@@ -133,7 +151,7 @@ def send_to_arduino(motor_speeds, servo_angle):
     data = str(int(motor_speeds[0])) + " " + str(int(motor_speeds[1])) + " " + str(int(motor_speeds[2])) + " " + str(int(motor_speeds[3])) + " " + str(int(servo_angle[0])) + " " + str(int(servo_angle[1])) + "\n"
     ser.write(data.encode("utf-8"))
     # print("Data send to Arduino: " + str(data))
-    # feedback = ser.readline()
+    feedback = ser.readline()
     # print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
     end_time = time.time()
     # print(f"Time taken to send data on serial: {end_time - start_time} seconds")
@@ -175,6 +193,9 @@ while True:
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
 ser = serial.Serial('/dev/ttyACM0', 9600)
+
+video_server_thread = threading.Thread(target=start_video_server)
+video_server_thread.start()
 
 app = Flask(__name__)
 CORS(app)
@@ -319,4 +340,5 @@ def position_event():
 #     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, shutdown_server)
     app.run(host='0.0.0.0')
