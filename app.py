@@ -278,8 +278,8 @@ def position_event():
         previous_angle_y = servo_angle[1]
 
         relative_angle_x = abs(servo_angle[0] - 90)
-        slow_side_coefficient = 1 - relative_angle_x / 90
-        fast_side_coefficient = 1 + relative_angle_x / 90
+        slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 22.5 else 0.75
+        fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 22.5 else 1.25
 
         # override motor_control when target is found again
         if target_lost_counter < 10 and is_target_lost == False:
