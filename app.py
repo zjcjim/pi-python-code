@@ -278,8 +278,8 @@ def position_event():
         previous_angle_y = servo_angle[1]
 
         relative_angle_x = abs(servo_angle[0] - 90)
-        slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/8 else 7/8
-        fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/8 else 9/8
+        slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/16 else 15/16
+        fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
 
         # override motor_control when target is found again
         if target_lost_counter < 10 and is_target_lost == False:
@@ -291,7 +291,7 @@ def position_event():
                 #                        1 * target_lost_counter + 10 * slow_side_coefficient, 
                 #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
                 #                        20)
-                motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 40 * fast_side_coefficient)]
+                motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
             else:
                 # turn left
                 # motor_speed_smoothing([0,
@@ -299,7 +299,7 @@ def position_event():
                 #                        1 * target_lost_counter + 12 * fast_side_coefficient, 
                 #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                 #                        20)
-                motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 40 * slow_side_coefficient)]
+                motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
