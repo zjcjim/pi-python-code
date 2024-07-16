@@ -25,12 +25,6 @@ servo_angle = [0.0, 0.0]
 previous_angle_x = 90
 previous_angle_y = 90
 
-# initialize the motor speeds and servo angles
-# send_to_arduino(motor_speeds, servo_angle)
-
-last_error_x= 0
-last_error_y = 0
-
 PID_count = 0
 
 target_lost_counter = 0
@@ -38,13 +32,13 @@ target_found_counter = 0
 
 def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     global motor_speeds
-    print("Processing speed smoothing...")
-    print("Current motor speeds: ", motor_speeds)
-    print("Target motor speeds: ", target_motor_speeds)
+    # print("Processing speed smoothing...")
+    # print("Current motor speeds: ", motor_speeds)
+    # print("Target motor speeds: ", target_motor_speeds)
     diff = [x - y for x, y in zip(target_motor_speeds, motor_speeds)]
     smoothed_diff = [1 / ((diff[i] / smoothing_factor) ** 2 + 1) * diff[i] for i in range(4)]
     motor_speeds = [int(x + y) for x, y in zip(motor_speeds, smoothed_diff)]
-    print("Smoothed motor speeds: ", motor_speeds)
+    # print("Smoothed motor speeds: ", motor_speeds)
 
 def getCPUtemperature():
     cmd = os.popen('vcgencmd measure_temp').readline()
@@ -96,9 +90,7 @@ def get_local_ip():
 
 def motor_control(previous_angle_x, is_target_lost=False):
     global motor_speeds
-    motor_speed_initial = 100
     speed_diff = abs(previous_angle_x - 90)
-    regulared = previous_angle_x / 90 - 1
 
     if is_target_lost:
         motor_speeds = [0, 0, 0, 0]
@@ -111,11 +103,9 @@ def motor_control(previous_angle_x, is_target_lost=False):
                 # turn left
                 # add a coefficent
                 motor_speed_smoothing([30, speed_diff * 1.2 + 150, speed_diff * 1.2 + 150, 30], 60)
-                print("Turning left")
             else:
                 # turn right
                 motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 40)
-                print("Turning right")
         else:
             # go straight
             motor_speed_smoothing([100, 100, 100, 100], 60)
@@ -142,11 +132,11 @@ def send_to_arduino(motor_speeds, servo_angle):
 
     data = str(int(motor_speeds[0])) + " " + str(int(motor_speeds[1])) + " " + str(int(motor_speeds[2])) + " " + str(int(motor_speeds[3])) + " " + str(int(servo_angle[0])) + " " + str(int(servo_angle[1])) + "\n"
     ser.write(data.encode("utf-8"))
-    print("Data send to Arduino: " + str(data))
-    feedback = ser.readline()
-    print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
+    # print("Data send to Arduino: " + str(data))
+    # feedback = ser.readline()
+    # print("Feedback from Arduino: " + str(feedback.decode("utf-8").replace('\n','')))
     end_time = time.time()
-    print(f"Time taken to send data on serial: {end_time - start_time} seconds")
+    # print(f"Time taken to send data on serial: {end_time - start_time} seconds")
 
 server_url = "http://127.0.0.1:9000"
 
@@ -227,12 +217,12 @@ def key_event():
 def position_event():
     global motor_speeds, servo_angle, target_lost_counter, target_found_counter
     data = request.get_json()
-    current_time = time.time()
+    # current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
 
-    print(f'Position received at {current_time}')
+    # print(f'Position received at {current_time}')
 
-    print("data: " + str(data))
+    # print("data: " + str(data))
     
     position_x = data.get('position_x')
     position_y = data.get('position_y')
@@ -249,11 +239,11 @@ def position_event():
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
         y_length_to_arc = math.atan2(position_y, 6.26) * 180 / math.pi
 
-        print("target angle x: " + str(x_length_to_arc + previous_angle_x))
-        print("previous angle x: " + str(previous_angle_x))
+        # print("target angle x: " + str(x_length_to_arc + previous_angle_x))
+        # print("previous angle x: " + str(previous_angle_x))
 
-        print("target angle y: " + str(y_length_to_arc + previous_angle_y))
-        print("previous angle y: " + str(previous_angle_y))
+        # print("target angle y: " + str(y_length_to_arc + previous_angle_y))
+        # print("previous angle y: " + str(previous_angle_y))
 
         if PID_count < 20:
             servo_angle[0] = int(x_length_to_arc * 0.5 + previous_angle_x)
@@ -277,9 +267,9 @@ def position_event():
         previous_angle_x = servo_angle[0]
         previous_angle_y = servo_angle[1]
 
-        relative_angle_x = abs(servo_angle[0] - 90)
-        slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/16 else 15/16
-        fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
+        # relative_angle_x = abs(servo_angle[0] - 90)
+        # slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/16 else 15/16
+        # fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
 
         # override motor_control when target is found again
         if target_lost_counter < 5 and is_target_lost == False:
@@ -312,19 +302,19 @@ def position_event():
 
         send_to_arduino(motor_speeds, servo_angle)
 
-        current_time = time.time()
-        print(f'send to arduino at {current_time}')
-        print("position_x: " + str(position_x))
-        print("position_y: " + str(position_y))
-        getCPUtemperature()
+        # current_time = time.time()
+        # print(f'send to arduino at {current_time}')
+        # print("position_x: " + str(position_x))
+        # print("position_y: " + str(position_y))
+        # getCPUtemperature()
 
         return jsonify({'message': 'Position received'})
     else:
         return jsonify({'error': 'Position not provided'}), 400
 
-@app.before_request
-def before_request():
-    print("Request received at "+ str(time.time()))
+# @app.before_request
+# def before_request():
+#     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
