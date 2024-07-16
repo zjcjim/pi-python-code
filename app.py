@@ -279,14 +279,25 @@ def position_event():
         previous_angle_x = servo_angle[0]
         previous_angle_y = servo_angle[1]
 
+        relative_angle_x = abs(servo_angle[0] - 90)
+        slow_side_coefficient = 1 - relative_angle_x / 90
+        fast_side_coefficient = 1 + relative_angle_x / 90
         # override motor_control when target is found again
-        if target_lost_counter < 6 and is_target_lost == False:
+        if target_lost_counter < 20 and is_target_lost == False:
             if position_x > 0:
                 # turn right
-                motor_speed_smoothing([40 + 2 * target_lost_counter, 10 * target_lost_counter, 10 * target_lost_counter, 40 + 2 * target_lost_counter], 20)
+                motor_speed_smoothing([5 * target_lost_counter + 90 * fast_side_coefficient, 
+                                       target_lost_counter + 20 * slow_side_coefficient, 
+                                       target_lost_counter + 20 * slow_side_coefficient, 
+                                       5 * target_lost_counter + 90 * fast_side_coefficient], 
+                                       40)
             else:
                 # turn left
-                motor_speed_smoothing([10 * target_lost_counter, 50 + 2 * target_lost_counter, 50 + 2 * target_lost_counter, 10 * target_lost_counter], 40)
+                motor_speed_smoothing([target_lost_counter + 20 * slow_side_coefficient, 
+                                       5 * target_lost_counter + 90 * fast_side_coefficient, 
+                                       5 * target_lost_counter + 90 * fast_side_coefficient, 
+                                       target_lost_counter + 20 * slow_side_coefficient], 
+                                       40)
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
