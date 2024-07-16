@@ -286,15 +286,15 @@ def position_event():
             print("smoothing motor speed start")
             if servo_angle[0] < 90:
                 # turn right
-                motor_speed_smoothing([1 * target_lost_counter + 20 * fast_side_coefficient, 
-                                       1 * target_lost_counter + 10 * slow_side_coefficient, 
+                motor_speed_smoothing([0, 
+                                       0, 
                                        1 * target_lost_counter + 10 * slow_side_coefficient, 
                                        1 * target_lost_counter + 20 * fast_side_coefficient], 
                                        30)
             else:
                 # turn left
-                motor_speed_smoothing([1 * target_lost_counter + 10 * slow_side_coefficient, 
-                                       1 * target_lost_counter + 20 * fast_side_coefficient, 
+                motor_speed_smoothing([0,
+                                       0,
                                        1 * target_lost_counter + 20 * fast_side_coefficient, 
                                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                                        50)
