@@ -7,6 +7,7 @@ import time
 import math
 import os
 import logging
+import threading
 
     
 last_error_x= 0
@@ -29,6 +30,9 @@ PID_count = 0
 
 target_lost_counter = 0
 target_found_counter = 0
+
+def start_video_server():
+    subprocess.run(["python3", "mjpeg_server_2.py"])
 
 def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     global motor_speeds
@@ -175,6 +179,9 @@ while True:
 backend_url = 'http://' + str(backend_ip) + ':5000/receive_url'
 
 ser = serial.Serial('/dev/ttyACM0', 9600)
+
+video_server_thread = threading.Thread(target=start_video_server)
+video_server_thread.start()
 
 app = Flask(__name__)
 CORS(app)
