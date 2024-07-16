@@ -69,8 +69,8 @@ def PID_Servo_Control(x, y):
     previous_x = x
     previous_y = y
     # 2 PID控制参数
-    pwm_x = error_x * 0.8 #+ (error_x - last_error_x)*0.5
-    pwm_y = error_y * 0.8 #+ (error_y - last_error_y)*0.5
+    pwm_x = error_x * 0.7 #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * 0.7 #+ (error_y - last_error_y)*0.5
     # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
 
     # 3 保存本次误差，以便下一次运算
@@ -282,7 +282,7 @@ def position_event():
         fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
 
         # override motor_control when target is found again
-        if target_lost_counter < 20 and is_target_lost == False:
+        if target_lost_counter < 5 and is_target_lost == False:
             print("smoothing motor speed start")
             if servo_angle[0] < 80:
                 # turn right
