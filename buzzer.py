@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 # Define pin for buzzer
-pinBuzzer = 30  # Change this to your actual GPIO pin number
+pinBuzzer = 23  # Change this to your actual GPIO pin number
 
 # Define frequencies for the notes
 frequencyA4s = 466
@@ -29,18 +29,19 @@ frequencyF6s = 1480
 stop = 0
 
 # Set up GPIO
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(pinBuzzer, GPIO.OUT)
 pwm = GPIO.PWM(pinBuzzer, 100)  # Initialize PWM on pinBuzzer 100Hz frequency
 
 def play_tone(note, duration):
     pwm.ChangeFrequency(note)
-    pwm.start(50)  # 50% duty cycle
+    pwm.start(20)  # 50% duty cycle
     time.sleep(duration)
     pwm.stop()
     time.sleep(0.02)  # Short pause between notes
 
 def play_note_sequence():
+    print("Playing tones")
     play_tone(frequencyB5, 0.2)
     play_tone(frequencyA5s, 0.2)
     play_tone(frequencyF5s, 0.2)
