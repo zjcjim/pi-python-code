@@ -282,10 +282,10 @@ def position_event():
         send_to_arduino(motor_speeds, servo_angle)
         
         # reset servo
-        if servo_angle[0] >= 150:
-            servo_angle[0] = 150
-        if servo_angle[0] <= 30:
-            servo_angle[0] = 30
+        if servo_angle[0] >= 180:
+            servo_angle[0] = 180
+        if servo_angle[0] <= 0:
+            servo_angle[0] = 0
 
         if servo_angle[1] > 180:
             servo_angle[1] = 180
@@ -302,16 +302,16 @@ def position_event():
         if target_lost_counter < 20 and is_target_lost == False:
             if servo_angle[0] > 90:
                 # turn right
-                motor_speed_smoothing([5 * target_lost_counter + 50 * fast_side_coefficient, 
-                                       target_lost_counter + 70 * slow_side_coefficient, 
-                                       target_lost_counter + 70 * slow_side_coefficient, 
-                                       5 * target_lost_counter + 50 * fast_side_coefficient], 
+                motor_speed_smoothing([4 * target_lost_counter + 50 * fast_side_coefficient, 
+                                       target_lost_counter + 20 * slow_side_coefficient, 
+                                       target_lost_counter + 20 * slow_side_coefficient, 
+                                       4 * target_lost_counter + 50 * fast_side_coefficient], 
                                        20)
             else:
                 # turn left
                 motor_speed_smoothing([target_lost_counter + 20 * slow_side_coefficient, 
-                                       5 * target_lost_counter + 70 * fast_side_coefficient, 
-                                       5 * target_lost_counter + 70 * fast_side_coefficient, 
+                                       4 * target_lost_counter + 50 * fast_side_coefficient, 
+                                       4 * target_lost_counter + 50 * fast_side_coefficient, 
                                        target_lost_counter + 20 * slow_side_coefficient], 
                                        25)
             target_lost_counter += 1
