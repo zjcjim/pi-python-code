@@ -35,7 +35,7 @@ pwm = GPIO.PWM(pinBuzzer, 100)  # Initialize PWM on pinBuzzer 100Hz frequency
 
 def play_tone(note, duration):
     pwm.ChangeFrequency(note)
-    pwm.start(80)  # 50% duty cycle
+    pwm.start(100)  # 50% duty cycle
     time.sleep(duration)
     pwm.stop()
     time.sleep(0.02)  # Short pause between notes
@@ -171,8 +171,8 @@ def play_note_sequence():
     play_tone(frequencyD5s, 0.3)
     play_tone(frequencyF5s, 0.2)
     play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyF5s, 0.1)
-    play_tone(frequencyF5s, 0.3)
+    play_tone(frequencyG5s, 0.1)
+    play_tone(frequencyG5s, 0.3)
     pwm.stop()
     time.sleep(0.2)
 
