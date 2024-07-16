@@ -261,7 +261,11 @@ def position_event():
             PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
             PID_count += 1
         else:
-            servo_angle[0], servo_angle[1] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
+            servo_angle[0], servo_angle[1
+        previous_angle_x = servo_angle[0]
+        previous_angle_y = servo_angle[1]
+
+        send_to_arduino(motor_speeds, servo_angle)] = PID_Servo_Control(float(x_length_to_arc + previous_angle_x), float(y_length_to_arc + previous_angle_y))
 
         # print("motor speeds: " + str(motor_speeds))
         previous_angle_x = servo_angle[0]
@@ -299,21 +303,21 @@ def position_event():
         slow_side_coefficient = 1 - relative_angle_x / 90
         fast_side_coefficient = 1 + relative_angle_x / 90
         # override motor_control when target is found again
-        if target_lost_counter < 20 and is_target_lost == False:
+        if target_lost_counter < 10 and is_target_lost == False:
             if servo_angle[0] < 90:
                 # turn right
-                motor_speed_smoothing([2 * target_lost_counter + 5 * fast_side_coefficient, 
-                                       1 * target_lost_counter + 5 * slow_side_coefficient, 
-                                       1 * target_lost_counter + 5 * slow_side_coefficient, 
-                                       2 * target_lost_counter + 5 * fast_side_coefficient], 
-                                       10)
+                motor_speed_smoothing([2 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       1 * target_lost_counter + 10 * slow_side_coefficient, 
+                                       1 * target_lost_counter + 10 * slow_side_coefficient, 
+                                       2 * target_lost_counter + 30 * fast_side_coefficient], 
+                                       30)
             else:
                 # turn left
-                motor_speed_smoothing([1 * target_lost_counter + 5 * slow_side_coefficient, 
-                                       2 * target_lost_counter + 5 * fast_side_coefficient, 
-                                       2 * target_lost_counter + 5 * fast_side_coefficient, 
-                                       1 * target_lost_counter + 5 * slow_side_coefficient], 
-                                       20)
+                motor_speed_smoothing([1 * target_lost_counter + 10 * slow_side_coefficient, 
+                                       2 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       2 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       1 * target_lost_counter + 10 * slow_side_coefficient], 
+                                       50)
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
