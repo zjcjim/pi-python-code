@@ -303,7 +303,7 @@ def position_event():
                 # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
                 motor_speeds = [0, 70, 140, 0]
             else:
-                motor_speeds = [60, 60, 60, 60]
+                motor_speeds = [80, 80, 80, 80]
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
