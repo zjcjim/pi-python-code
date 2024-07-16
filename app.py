@@ -299,20 +299,20 @@ def position_event():
         slow_side_coefficient = 1 - relative_angle_x / 90
         fast_side_coefficient = 1 + relative_angle_x / 90
         # override motor_control when target is found again
-        if target_lost_counter < 20 and is_target_lost == False:
-            if servo_angle[0] > 90:
+        if target_lost_counter < 10 and is_target_lost == False:
+            if servo_angle[0] < 90:
                 # turn right
-                motor_speed_smoothing([4 * target_lost_counter + 50 * fast_side_coefficient, 
-                                       target_lost_counter + 20 * slow_side_coefficient, 
-                                       target_lost_counter + 20 * slow_side_coefficient, 
-                                       4 * target_lost_counter + 50 * fast_side_coefficient], 
+                motor_speed_smoothing([8 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       1 * target_lost_counter + 5 * slow_side_coefficient, 
+                                       1 * target_lost_counter + 5 * slow_side_coefficient, 
+                                       8 * target_lost_counter + 30 * fast_side_coefficient], 
                                        20)
             else:
                 # turn left
-                motor_speed_smoothing([target_lost_counter + 20 * slow_side_coefficient, 
-                                       4 * target_lost_counter + 50 * fast_side_coefficient, 
-                                       4 * target_lost_counter + 50 * fast_side_coefficient, 
-                                       target_lost_counter + 20 * slow_side_coefficient], 
+                motor_speed_smoothing([1 * target_lost_counter + 5 * slow_side_coefficient, 
+                                       8 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       8 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       1 * target_lost_counter + 5 * slow_side_coefficient], 
                                        25)
             target_lost_counter += 1
             target_found_counter = 0
