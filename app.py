@@ -292,7 +292,7 @@ def position_event():
                 #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
                 #                        20)
                 # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
-                motor_speeds = [50, 0, 0, 140]
+                motor_speeds = [70, 0, 0, 140]
             else:
                 # turn left
                 # motor_speed_smoothing([0,
@@ -301,7 +301,7 @@ def position_event():
                 #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                 #                        20)
                 # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
-                motor_speeds = [0, 50, 140, 0]
+                motor_speeds = [0, 70, 140, 0]
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
