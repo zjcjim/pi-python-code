@@ -9,6 +9,7 @@ import os
 import logging
 import threading
 import subprocess
+import signal
 
     
 last_error_x= 0
@@ -34,6 +35,18 @@ target_found_counter = 0
 
 def start_video_server():
     subprocess.run(["python3", "mjpeg_server_2.py"])
+
+def shutdown_server(signal, frame):
+    print("Shutting down server...")
+    video_server_thread.join(1)
+
+    if ser.is_open:
+        ser.close()
+
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
 def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     global motor_speeds
@@ -327,4 +340,5 @@ def position_event():
 #     print("Request received at "+ str(time.time()))
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, shutdown_server)
     app.run(host='0.0.0.0')
