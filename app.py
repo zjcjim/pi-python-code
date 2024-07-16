@@ -275,7 +275,7 @@ def position_event():
 
         # override motor_control when target is found again
         if target_lost_counter < 5 and is_target_lost == False:
-            print("smoothing motor speed start")
+            # print("smoothing motor speed start")
             if servo_angle[0] < 80:
                 # turn right
                 # motor_speed_smoothing([0, 
