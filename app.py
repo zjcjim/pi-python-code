@@ -282,10 +282,10 @@ def position_event():
         send_to_arduino(motor_speeds, servo_angle)
         
         # reset servo
-        if servo_angle[0] >= 180:
-            servo_angle[0] = 180
-        if servo_angle[0] <= 0:
-            servo_angle[0] = 0
+        if servo_angle[0] >= 150:
+            servo_angle[0] = 150
+        if servo_angle[0] <= 30:
+            servo_angle[0] = 30
 
         if servo_angle[1] > 180:
             servo_angle[1] = 180
@@ -299,21 +299,21 @@ def position_event():
         slow_side_coefficient = 1 - relative_angle_x / 90
         fast_side_coefficient = 1 + relative_angle_x / 90
         # override motor_control when target is found again
-        if target_lost_counter < 10 and is_target_lost == False:
+        if target_lost_counter < 20 and is_target_lost == False:
             if servo_angle[0] < 90:
                 # turn right
-                motor_speed_smoothing([8 * target_lost_counter + 30 * fast_side_coefficient, 
+                motor_speed_smoothing([2 * target_lost_counter + 5 * fast_side_coefficient, 
                                        1 * target_lost_counter + 5 * slow_side_coefficient, 
                                        1 * target_lost_counter + 5 * slow_side_coefficient, 
-                                       8 * target_lost_counter + 30 * fast_side_coefficient], 
-                                       20)
+                                       2 * target_lost_counter + 5 * fast_side_coefficient], 
+                                       10)
             else:
                 # turn left
                 motor_speed_smoothing([1 * target_lost_counter + 5 * slow_side_coefficient, 
-                                       8 * target_lost_counter + 30 * fast_side_coefficient, 
-                                       8 * target_lost_counter + 30 * fast_side_coefficient, 
+                                       2 * target_lost_counter + 5 * fast_side_coefficient, 
+                                       2 * target_lost_counter + 5 * fast_side_coefficient, 
                                        1 * target_lost_counter + 5 * slow_side_coefficient], 
-                                       25)
+                                       20)
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
