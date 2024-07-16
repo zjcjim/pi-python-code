@@ -69,8 +69,8 @@ def PID_Servo_Control(x, y):
     previous_x = x
     previous_y = y
     # 2 PID控制参数
-    pwm_x = error_x * 0.7 #+ (error_x - last_error_x)*0.5
-    pwm_y = error_y * 0.7 #+ (error_y - last_error_y)*0.5
+    pwm_x = error_x * 0.8 #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * 0.8 #+ (error_y - last_error_y)*0.5
     # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
 
     # 3 保存本次误差，以便下一次运算
@@ -286,18 +286,18 @@ def position_event():
         if target_lost_counter < 20 and is_target_lost == False:
             if position_x > 0:
                 # turn right
-                motor_speed_smoothing([5 * target_lost_counter + 90 * fast_side_coefficient, 
+                motor_speed_smoothing([4 * target_lost_counter + 70 * fast_side_coefficient, 
                                        target_lost_counter + 20 * slow_side_coefficient, 
                                        target_lost_counter + 20 * slow_side_coefficient, 
-                                       5 * target_lost_counter + 90 * fast_side_coefficient], 
-                                       40)
+                                       4 * target_lost_counter + 70 * fast_side_coefficient], 
+                                       25)
             else:
                 # turn left
                 motor_speed_smoothing([target_lost_counter + 20 * slow_side_coefficient, 
-                                       5 * target_lost_counter + 90 * fast_side_coefficient, 
-                                       5 * target_lost_counter + 90 * fast_side_coefficient, 
+                                       4 * target_lost_counter + 70 * fast_side_coefficient, 
+                                       4 * target_lost_counter + 70 * fast_side_coefficient, 
                                        target_lost_counter + 20 * slow_side_coefficient], 
-                                       40)
+                                       30)
             target_lost_counter += 1
             target_found_counter = 0
         elif target_found_counter < 6 and is_target_lost == True:
