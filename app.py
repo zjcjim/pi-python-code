@@ -33,7 +33,7 @@ target_lost_counter = 0
 target_found_counter = 0
 
 def laser_blink():
-    for i in range(3):
+    for i in range(4):
         GPIO.output(laser_pin, GPIO.HIGH)
         time.sleep(0.5)
         GPIO.output(laser_pin, GPIO.LOW)
@@ -193,7 +193,7 @@ GPIO.setup(laser_pin, GPIO.OUT)
 app = Flask(__name__)
 CORS(app)
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.WARNING)
 
 @app.route('/key', methods=['POST'])
 def key_event():
@@ -205,8 +205,8 @@ def key_event():
     # maybe change frontend
     if key_pressed == 'shoot':
         is_target_destroyed = True
-        print("Target destroyed")
         laser_blink()
+        print("Target destroyed")
         is_target_destroyed = False
 
     return jsonify({'message': 'Key received'})
