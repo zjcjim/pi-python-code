@@ -22,6 +22,7 @@ error_y = 0
 motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
 is_target_destroyed = False
+is_target_found_again = False
 target_lock_counter = 0
 
 previous_angle_x = 90
@@ -59,7 +60,7 @@ def getCPUtemperature():
 
 def PID_Servo_Control(x, y):
     global error_x, error_y, last_error_x, last_error_y, previous_x, previous_y, pid_x, pid_y, is_target_destroyed
-    if is_target_destroyed:
+    if is_target_destroyed or is_target_found_again:
         Kp = 0.55
     else:
         Kp = 0.9
@@ -217,7 +218,7 @@ def key_event():
 
 @app.route('/position', methods=['POST'])
 def position_event():
-    global motor_speeds, servo_angle, target_lost_counter, target_found_counter, target_lock_counter, is_target_destroyed
+    global motor_speeds, servo_angle, target_lost_counter, target_found_counter, target_lock_counter, is_target_destroyed, is_target_found_again
     data = request.get_json()
     # current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
@@ -245,6 +246,47 @@ def position_event():
             GPIO.output(laser_pin, GPIO.HIGH)
         elif target_lock_counter == 0:
             GPIO.output(laser_pin, GPIO.LOW)
+
+        # relative_angle_x = abs(servo_angle[0] - 90)
+        # slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/16 else 15/16
+        # fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
+
+        if not is_target_destroyed:
+
+            motor_control(previous_angle_x, is_target_lost)
+
+            # override motor_control when target is found again
+            if target_lost_counter < 5 and is_target_lost == False:
+                is_target_found_again = True
+                # print("smoothing motor speed start")
+                if servo_angle[0] < 80:
+                    # turn right
+                    # motor_speed_smoothing([0, 
+                    #                        0, 
+                    #                        1 * target_lost_counter + 10 * slow_side_coefficient, 
+                    #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
+                    #                        20)
+                    # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
+                    motor_speeds = [70, 0, 0, 110]
+                elif servo_angle[0] > 100:
+                    # turn left
+                    # motor_speed_smoothing([0,
+                    #                        0,
+                    #                        1 * target_lost_counter + 12 * fast_side_coefficient, 
+                    #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
+                    #                        20)
+                    # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
+                    motor_speeds = [0, 80, 120, 0]
+                else:
+                    motor_speeds = [70, 70, 70, 70]
+                target_lost_counter += 1
+                target_found_counter = 0
+            elif target_found_counter < 6 and is_target_lost == True:
+                target_found_counter += 1
+                target_lost_counter = 0
+
+        else:
+            motor_speeds = [0, 0, 0, 0]
 
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
         y_length_to_arc = math.atan2(position_y, 6.26) * 180 / math.pi
@@ -277,47 +319,9 @@ def position_event():
         previous_angle_x = servo_angle[0]
         previous_angle_y = servo_angle[1]
 
-        # relative_angle_x = abs(servo_angle[0] - 90)
-        # slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/16 else 15/16
-        # fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
-
-        if not is_target_destroyed:
-
-            motor_control(previous_angle_x, is_target_lost)
-
-            # override motor_control when target is found again
-            if target_lost_counter < 5 and is_target_lost == False:
-                # print("smoothing motor speed start")
-                if servo_angle[0] < 80:
-                    # turn right
-                    # motor_speed_smoothing([0, 
-                    #                        0, 
-                    #                        1 * target_lost_counter + 10 * slow_side_coefficient, 
-                    #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
-                    #                        20)
-                    # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
-                    motor_speeds = [70, 0, 0, 110]
-                elif servo_angle[0] > 100:
-                    # turn left
-                    # motor_speed_smoothing([0,
-                    #                        0,
-                    #                        1 * target_lost_counter + 12 * fast_side_coefficient, 
-                    #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
-                    #                        20)
-                    # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
-                    motor_speeds = [0, 80, 120, 0]
-                else:
-                    motor_speeds = [70, 70, 70, 70]
-                target_lost_counter += 1
-                target_found_counter = 0
-            elif target_found_counter < 6 and is_target_lost == True:
-                target_found_counter += 1
-                target_lost_counter = 0
-
-        else:
-            motor_speeds = [0, 0, 0, 0]
-
         send_to_arduino(motor_speeds, servo_angle)
+
+        is_target_found_again = False
 
         # current_time = time.time()
         # print(f'send to arduino at {current_time}')
