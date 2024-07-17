@@ -239,6 +239,8 @@ def position_event():
 
         if target_lock_counter > 3:
             GPIO.output(laser_pin, GPIO.HIGH)
+        elif target_lock_counter == 0:
+            GPIO.output(laser_pin, GPIO.LOW)
 
         x_length_to_arc = -math.atan2(position_x, 2.58) * 180 / math.pi
         y_length_to_arc = math.atan2(position_y, 6.26) * 180 / math.pi
