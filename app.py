@@ -117,10 +117,10 @@ def motor_control(previous_angle_x, is_target_lost=False):
             if previous_angle_x > 90:
                 # turn left
                 # add a coefficent
-                motor_speed_smoothing([30, speed_diff * 1.2 + 150, speed_diff * 1.2 + 150, 30], 40)
+                motor_speed_smoothing([30, speed_diff * 1.2 + 150, speed_diff * 1.2 + 150, 30], 45)
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 40)
+                motor_speed_smoothing([speed_diff + 150, 40, 40, speed_diff + 150], 45)
         else:
             # go straight
             motor_speed_smoothing([120, 120, 120, 120], 60)
@@ -267,7 +267,7 @@ def position_event():
                     #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
-                    motor_speeds = [55, 0, 0, 95]
+                    motor_speeds = [50, 0, 0, 85]
                 elif servo_angle[0] > 100:
                     # turn left
                     # motor_speed_smoothing([0,
@@ -276,7 +276,7 @@ def position_event():
                     #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
-                    motor_speeds = [0, 55, 95, 0]
+                    motor_speeds = [0, 50, 85, 0]
                 else:
                     motor_speeds = [70, 70, 70, 70]
                 target_lost_counter += 1
