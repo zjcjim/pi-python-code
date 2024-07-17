@@ -301,7 +301,7 @@ def position_event():
                     #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
-                    motor_speeds = [0, 80, 110, 0]
+                    motor_speeds = [0, 80, 120, 0]
                 else:
                     motor_speeds = [70, 70, 70, 70]
                 target_lost_counter += 1
