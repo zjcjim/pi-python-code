@@ -9,6 +9,37 @@ import os
 import logging
 import RPi.GPIO as GPIO
 
+from buzzer import play_note_sequence, play_tone
+
+# Define pin for buzzer
+pinBuzzer = 23  # Change this to your actual GPIO pin number
+
+# Define frequencies for the notes
+frequencyA4s = 466
+frequencyB4 = 494
+frequencyC5 = 523
+frequencyC5S = 554
+frequencyD5 = 587
+frequencyD5s = 622
+frequencyE5 = 659
+frequencyF5 = 698
+frequencyF5s = 740
+frequencyG5 = 784
+frequencyG5s = 831
+frequencyA5 = 880
+frequencyA5s = 932
+frequencyB5 = 988
+frequencyC6 = 1047
+frequencyC6s = 1109
+frequencyC6sp = 1118
+frequencyD6 = 1175
+frequencyD6s = 1245
+frequencyE6 = 1319
+frequencyE6sp = 1380
+frequencyF6 = 1397
+frequencyF6s = 1480
+stop = 0
+
 last_error_x= 0
 last_error_y = 0
 previous_x = 0
@@ -23,6 +54,7 @@ motor_speeds = [0, 0, 0, 0]
 servo_angle = [0.0, 0.0]
 is_target_destroyed = False
 is_target_found_again = False
+playing_sound = False
 target_lock_counter = 0
 
 previous_angle_x = 90
@@ -194,6 +226,8 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 laser_pin = 14
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(laser_pin, GPIO.OUT)
+GPIO.setup(pinBuzzer, GPIO.OUT)
+pwm = GPIO.PWM(pinBuzzer, 100)  # Initialize PWM on pinBuzzer 100Hz frequency
 
 app = Flask(__name__)
 CORS(app)
@@ -202,7 +236,7 @@ log.setLevel(logging.WARNING)
 
 @app.route('/key', methods=['POST'])
 def key_event():
-    global is_target_destroyed
+    global is_target_destroyed, playing_sound
     data = request.get_json()
     key_pressed = data.get('key')
     print(f'Key pressed: {key_pressed}')
@@ -214,11 +248,17 @@ def key_event():
         print("Target destroyed")
         is_target_destroyed = False
 
+    if key_pressed == 'sound':
+        playing_sound = True
+        print("Playing sound")
+        play_note_sequence()
+        playing_sound = False
+
     return jsonify({'message': 'Key received'})
 
 @app.route('/position', methods=['POST'])
 def position_event():
-    global motor_speeds, servo_angle, target_lost_counter, target_found_counter, target_lock_counter, is_target_destroyed, is_target_found_again
+    global motor_speeds, servo_angle, target_lost_counter, target_found_counter, target_lock_counter, is_target_destroyed, is_target_found_again, playing_sound
     data = request.get_json()
     # current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
@@ -251,7 +291,7 @@ def position_event():
         # slow_side_coefficient = 1 - relative_angle_x / 90 if relative_angle_x < 90/16 else 15/16
         # fast_side_coefficient = 1 + relative_angle_x / 90 if relative_angle_x < 90/16 else 17/16
 
-        if not is_target_destroyed:
+        if not is_target_destroyed and not playing_sound:
 
             motor_control(previous_angle_x, is_target_lost)
 
