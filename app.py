@@ -203,7 +203,7 @@ def key_event():
     print(f'Key pressed: {key_pressed}')
 
     # maybe change frontend
-    if key_pressed == 'd':
+    if key_pressed == 'shoot':
         is_target_destroyed = True
         print("Target destroyed")
         laser_blink()
