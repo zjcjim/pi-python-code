@@ -21,7 +21,7 @@ frequencyA5s = 932
 frequencyB5 = 988
 frequencyC6 = 1047
 frequencyC6s = 1109
-frequencyC6sp = 1130
+frequencyC6sp = 1150
 frequencyD6 = 1175
 frequencyD6s = 1245
 frequencyE6 = 1319
@@ -67,10 +67,10 @@ def play_note_sequence():
     # play_tone(frequencyG5s, 0.1)
     # play_tone(frequencyG5s, 0.3)
     # play_tone(frequencyG5s, 0.2)
-    play_tone(frequencyG5s, 0.2)
-    play_tone(frequencyA5s, 0.2)
-    play_tone(frequencyB5, 0.2)
-    play_tone(frequencyC6s, 0.2)
+    # play_tone(frequencyG5s, 0.2)
+    # play_tone(frequencyA5s, 0.2)
+    # play_tone(frequencyB5, 0.2)
+    # play_tone(frequencyC6s, 0.2)
     play_tone(frequencyA5s, 0.4)#844
     play_tone(frequencyF5s, 0.4)#643/683
     play_tone(frequencyE6sp, 0.4)#1150/1119
