@@ -21,11 +21,11 @@ frequencyA5s = 932
 frequencyB5 = 988
 frequencyC6 = 1047
 frequencyC6s = 1109
-frequencyC6sp = 1120
+frequencyC6sp = 1125
 frequencyD6 = 1175
 frequencyD6s = 1245
 frequencyE6 = 1319
-frequencyE6sp = 1368
+frequencyE6sp = 1390
 frequencyF6 = 1397
 frequencyF6s = 1480
 stop = 0
@@ -52,21 +52,21 @@ def play_note_sequence():
     # play_tone(frequencyA5, 2)
     # play_tone(frequencyB5, 2)
     
-    play_tone(frequencyB5, 0.2)
-    play_tone(frequencyA5s, 0.2)
-    play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyG5s, 0.1)
-    play_tone(frequencyG5s, 0.3)
-    play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyG5s, 0.1)
-    play_tone(frequencyG5s, 0.3)
-    play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyF5s, 0.2)
-    play_tone(frequencyG5s, 0.1)
-    play_tone(frequencyG5s, 0.3)
-    play_tone(frequencyG5s, 0.2)
+    # play_tone(frequencyB5, 0.2)
+    # play_tone(frequencyA5s, 0.2)
+    # play_tone(frequencyF5s, 0.2)
+    # play_tone(frequencyF5s, 0.2)
+    # play_tone(frequencyG5s, 0.1)
+    # play_tone(frequencyG5s, 0.3)
+    # play_tone(frequencyF5s, 0.2)
+    # play_tone(frequencyF5s, 0.2)
+    # play_tone(frequencyG5s, 0.1)
+    # play_tone(frequencyG5s, 0.3)
+    # play_tone(frequencyF5s, 0.2)
+    # play_tone(frequencyF5s, 0.2)
+    # play_tone(frequencyG5s, 0.1)
+    # play_tone(frequencyG5s, 0.3)
+    # play_tone(frequencyG5s, 0.2)
     play_tone(frequencyG5s, 0.2)
     play_tone(frequencyA5s, 0.2)
     play_tone(frequencyB5, 0.2)
