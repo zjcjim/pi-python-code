@@ -337,5 +337,13 @@ def position_event():
 # def before_request():
 #     print("Request received at "+ str(time.time()))
 
+@app.route('/get-status', methods=['GET'])
+def get_status():
+    global motor_speeds
+    return jsonify({'motor_speed_1': motor_speeds[0], 
+                    'motor_speed_2': motor_speeds[1], 
+                    'motor_speed_3': motor_speeds[2], 
+                    'motor_speed_4': motor_speeds[3]})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
