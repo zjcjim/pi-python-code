@@ -58,7 +58,11 @@ def getCPUtemperature():
     return temp
 
 def PID_Servo_Control(x, y):
-    global error_x, error_y, last_error_x, last_error_y, previous_x, previous_y,pid_x,pid_y
+    global error_x, error_y, last_error_x, last_error_y, previous_x, previous_y, pid_x, pid_y, is_target_destroyed
+    if is_target_destroyed:
+        Kp = 0.55
+    else:
+        Kp = 0.9
     # 下面开始pid算法：
     # pid总公式：PID = Uk + KP*【E(k)-E(k-1)】 + KI*E(k) + KD*【E(k)-2E(k-1)+E(k-2)】 
     # 这里只用到了p，所以公式为：P = Uk + KP*【E(k)-E(k-1)】
@@ -73,8 +77,8 @@ def PID_Servo_Control(x, y):
     previous_x = x
     previous_y = y
     # 2 PID控制参数
-    pwm_x = error_x * 0.7 #+ (error_x - last_error_x)*0.5
-    pwm_y = error_y * 0.7 #+ (error_y - last_error_y)*0.5
+    pwm_x = error_x * Kp #+ (error_x - last_error_x)*0.5
+    pwm_y = error_y * Kp #+ (error_y - last_error_y)*0.5
     # 这里pwm（p分量） = 当前误差*3 + 上次的误差增量*1
 
     # 3 保存本次误差，以便下一次运算
