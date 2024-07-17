@@ -232,7 +232,7 @@ def position_event():
 
     if position_x is not None and position_y is not None:
 
-        if position_x < 0.2 and position_y < 0.2:
+        if position_x < 0.2 and position_y < 0.2 and not is_target_lost:
             target_lock_counter += 1
         else:
             target_lock_counter = 0
