@@ -410,9 +410,11 @@ def key_event():
 
     return jsonify({'message': 'Key received'})
 
+previous_position_x = 0
+
 @app.route('/position', methods=['POST'])
 def position_event():
-    global motor_speeds, servo_angle, target_lost_counter, target_found_counter, target_lock_counter, is_target_destroyed, is_target_found_again, playing_sound
+    global motor_speeds, servo_angle, target_lost_counter, target_found_counter, target_lock_counter, is_target_destroyed, is_target_found_again, playing_sound, previous_position_x
     data = request.get_json()
     # current_time = time.time()
     global previous_angle_x, previous_angle_y, PID_count
@@ -424,14 +426,16 @@ def position_event():
     position_x = data.get('position_x')
     position_y = data.get('position_y')
     target_lost = data.get('target_lost')
+    
+    previous_position_x = position_x if position_x is not 0 else previous_position_x
 
     position_x = float(position_x)
     position_y = float(position_y)
     is_target_lost = (target_lost.lower() == 'true')
 
-    if position_x > 0.7:
+    if previous_position_x > 0.4:
         x_direction = 1
-    elif position_x < -0.7:
+    elif previous_position_x < -0.4:
         x_direction = 2
     else:
         x_direction = 0
