@@ -286,10 +286,10 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
         search_counter += 1
         if search_counter == 2:
             if x_direction == 1:
-                motor_speeds = [70, 0, 0, 70]
+                motor_speeds = [140, 0, 0, 140]
                 search_counter = 0
             elif x_direction == 2:
-                motor_speeds = [0, 70, 70, 0]
+                motor_speeds = [0, 140, 140, 0]
                 search_counter = 0
             else:
                 motor_speeds = [0, 0, 0, 0]
