@@ -287,11 +287,12 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
         if search_counter == 2:
             if x_direction == 1:
                 motor_speeds = [40, 0, 0, 40]
+                search_counter = 0
             elif x_direction == 2:
                 motor_speeds = [0, 40, 40, 0]
+                search_counter = 0
             else:
                 motor_speeds = [0, 0, 0, 0]
-            search_counter = 0
         else:
             motor_speeds = [0, 0, 0, 0]
             
@@ -431,7 +432,7 @@ def position_event():
     position_y = float(position_y)
     is_target_lost = (target_lost.lower() == 'true')
 
-    previous_position_x = position_x if position_x is not 0 else previous_position_x
+    previous_position_x = position_x if abs(position_x) > 0.1 else previous_position_x
 
     if previous_position_x > 0.4 and is_target_lost:
         x_direction = 1
