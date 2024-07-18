@@ -426,12 +426,12 @@ def position_event():
     position_x = data.get('position_x')
     position_y = data.get('position_y')
     target_lost = data.get('target_lost')
-    
-    previous_position_x = position_x if position_x is not 0 else previous_position_x
 
     position_x = float(position_x)
     position_y = float(position_y)
     is_target_lost = (target_lost.lower() == 'true')
+
+    previous_position_x = position_x if position_x is not 0 else previous_position_x
 
     if previous_position_x > 0.4:
         x_direction = 1
