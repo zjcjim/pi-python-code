@@ -433,11 +433,11 @@ def position_event():
 
     previous_position_x = position_x if position_x is not 0 else previous_position_x
 
-    if previous_position_x > 0.4:
+    if previous_position_x > 0.4 and is_target_lost:
         x_direction = 1
         print("previous_position_x: " + str(previous_position_x))
         print("turn right to find target")
-    elif previous_position_x < -0.4:
+    elif previous_position_x < -0.4 and is_target_lost:
         x_direction = 2
         print("previous_position_x: " + str(previous_position_x))
         print("turn left to find target")
