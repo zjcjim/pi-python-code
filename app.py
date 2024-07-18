@@ -33,7 +33,7 @@ frequencyC6sp = 1118
 frequencyD6 = 1175
 frequencyD6s = 1245
 frequencyE6 = 1319
-frequencyE6sp = 1380
+frequencyE6sp = 1370
 frequencyF6 = 1397
 frequencyF6s = 1480
 stop = 0
@@ -277,12 +277,22 @@ def get_local_ip():
         s.close()
     return ip
 
-def motor_control(previous_angle_x, is_target_lost=False):
-    global motor_speeds
+search_counter = 0
+def motor_control(previous_angle_x, x_direction, is_target_lost=False):
+    global motor_speeds, search_counter
     speed_diff = abs(previous_angle_x - 90)
 
     if is_target_lost:
-        motor_speeds = [0, 0, 0, 0]
+        search_counter += 1
+        if search_counter == 2:
+            if x_direction:
+                motor_speeds = [40, 0, 0, 40]
+            else:
+                motor_speeds = [0, 40, 40, 0]
+            search_counter = 0
+        else:
+            motor_speeds = [0, 0, 0, 0]
+            
     else:
         if abs(previous_angle_x - 90) > 60:
             motor_speeds = [0, 0, 0, 0]
@@ -417,6 +427,8 @@ def position_event():
     position_y = float(position_y)
     is_target_lost = (target_lost.lower() == 'true')
 
+    x_direction = position_x > 0
+
     if position_x is not None and position_y is not None:
 
         if position_x < 0.2 and position_y < 0.2 and not is_target_lost:
@@ -435,7 +447,7 @@ def position_event():
 
         if not is_target_destroyed and not playing_sound:
 
-            motor_control(previous_angle_x, is_target_lost)
+            motor_control(previous_angle_x, x_direction, is_target_lost)
 
             # override motor_control when target is found again
             if target_lost_counter < 4 and is_target_lost == False:
