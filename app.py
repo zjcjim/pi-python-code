@@ -132,13 +132,16 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
             if previous_angle_x > 90:
                 # turn left
                 # add a coefficent
-                motor_speed_smoothing([-100, speed_diff * 1 + 100, speed_diff * 1 + 100, -100], 200)
+                # motor_speed_smoothing([-100, speed_diff * 1 + 100, speed_diff * 1 + 100, -100], 200)
+                motor_speeds = [-100, speed_diff * 1 + 100, speed_diff * 1 + 100, -100]
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff * 0.8 + 100, -100, -100, speed_diff * 0.8 + 100], 200)
+                # motor_speed_smoothing([speed_diff * 0.8 + 100, -100, -100, speed_diff * 0.8 + 100], 200)
+                motor_speeds = [speed_diff * 0.8 + 100, -100, -100, speed_diff * 0.8 + 100]
         else:
             # go straight
-            motor_speed_smoothing([100, 100, 100, 100], 60)
+            # motor_speed_smoothing([100, 100, 100, 100], 60)
+            motor_speeds = [100, 100, 100, 100]
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
