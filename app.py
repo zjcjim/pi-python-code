@@ -264,16 +264,16 @@ def position_event():
 
     if previous_position_x > 0.1 and is_target_lost:
         x_direction = 1
-        print("previous_position_x: " + str(previous_position_x))
-        print("turn right to find target")
+        #print("previous_position_x: " + str(previous_position_x))
+        #print("turn right to find target")
     elif previous_position_x < -0.1 and is_target_lost:
         x_direction = 2
-        print("previous_position_x: " + str(previous_position_x))
-        print("turn left to find target")
+        #print("previous_position_x: " + str(previous_position_x))
+        #print("turn left to find target")
     else:
         x_direction = 0
-        print("previous_position_x: " + str(previous_position_x))
-        print("stop")
+        #print("previous_position_x: " + str(previous_position_x))
+        #print("stop")
 
     if position_x is not None and position_y is not None:
 
