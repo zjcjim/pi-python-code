@@ -208,9 +208,8 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 
 laser_pin = 14
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(laser_pin, GPIO.OUT)
-GPIO.setup(pinBuzzer, GPIO.OUT)
-pwm = GPIO.PWM(pinBuzzer, 100)  # Initialize PWM on pinBuzzer 100Hz frequency
+GPIO.setup(laser_pin, GPIO.OUT)  
+# Initialize PWM on pinBuzzer 100Hz frequency
 
 app = Flask(__name__)
 CORS(app)
@@ -234,7 +233,6 @@ def key_event():
     if key_pressed == 'sound':
         playing_sound = True
         print("Playing sound")
-        play_note_sequence()
         playing_sound = False
 
     return jsonify({'message': 'Key received'})
