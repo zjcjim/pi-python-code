@@ -50,6 +50,11 @@ def motor_speed_smoothing(target_motor_speeds, smoothing_factor):
     diff = [x - y for x, y in zip(target_motor_speeds, motor_speeds)]
     smoothed_diff = [1 / ((diff[i] / smoothing_factor) ** 2 + 1) * diff[i] for i in range(4)]
     motor_speeds = [int(x + y) for x, y in zip(motor_speeds, smoothed_diff)]
+    for i in range(4):
+        if motor_speeds[i] > 255:
+            motor_speeds[i] = 255
+        if motor_speeds[i] < -255:
+            motor_speeds[i] = -255
     # print("Smoothed motor speeds: ", motor_speeds)
 
 def getCPUtemperature():
@@ -113,9 +118,9 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
         search_counter += 1
         if search_counter > 5 and search_counter < 10:
             if x_direction == 1:
-                motor_speeds = [100, -70, -70, 100]
+                motor_speeds = [150, -150, -150, 150]
             elif x_direction == 2:
-                motor_speeds = [-70, 100, 100, -70]
+                motor_speeds = [-150, 150, 150, -150]
             else:
                 motor_speeds = [0, 0, 0, 0]
         elif search_counter == 10:
@@ -132,13 +137,13 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
             if previous_angle_x > 90:
                 # turn left
                 # add a coefficent
-                motor_speed_smoothing([40, speed_diff * 1 + 100, speed_diff * 1 + 100, 40], 45)
+                motor_speed_smoothing([0, speed_diff * 1.5 + 100, speed_diff * 1.5 + 100, 0], 50)
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff * 0.8 + 100, 40, 40, speed_diff * 0.8 + 100], 45)
+                motor_speed_smoothing([speed_diff * 1.5 + 100, 0, 0, speed_diff * 1.5 + 100], 50)
         else:
             # go straight
-            motor_speed_smoothing([100, 100, 100, 100], 60)
+            motor_speed_smoothing([150, 150, 150, 150], 60)
 
 def capture_image(server_url):
     response = requests.get(f"{server_url}/capture")
@@ -305,7 +310,7 @@ def position_event():
                     #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
-                    motor_speeds = [0, 0, 0, 50]
+                    motor_speeds = [150, 0, 0, 150]
                 elif servo_angle[0] > 100:
                     # turn left
                     # motor_speed_smoothing([0,
@@ -314,9 +319,9 @@ def position_event():
                     #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
-                    motor_speeds = [0, 0, 50, 0]
+                    motor_speeds = [0, 150, 150, 0]
                 else:
-                    motor_speeds = [40, 40, 40, 40]
+                    motor_speeds = [100, 100, 100, 100]
                 target_lost_counter += 1
                 target_found_counter = 0
             elif target_found_counter < 6 and is_target_lost == True:
