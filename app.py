@@ -305,10 +305,10 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
             if previous_angle_x > 90:
                 # turn left
                 # add a coefficent
-                motor_speed_smoothing([20, speed_diff * 1.1 + 80, speed_diff * 1.1 + 80, 20], 45)
+                motor_speed_smoothing([20, speed_diff * 1.5 + 80, speed_diff * 1.5 + 80, 20], 45)
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff + 80, 20, 20, speed_diff + 80], 45)
+                motor_speed_smoothing([speed_diff * 1.3 + 80, 20, 20, speed_diff * 1.3 + 80], 45)
         else:
             # go straight
             motor_speed_smoothing([100, 100, 100, 100], 60)
