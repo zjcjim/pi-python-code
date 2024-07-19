@@ -132,10 +132,10 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
             if previous_angle_x > 90:
                 # turn left
                 # add a coefficent
-                motor_speed_smoothing([30, speed_diff * 1 + 100, speed_diff * 1 + 100, 30], 45)
+                motor_speed_smoothing([40, speed_diff * 1 + 100, speed_diff * 1 + 100, 40], 45)
             else:
                 # turn right
-                motor_speed_smoothing([speed_diff * 0.8 + 100, 30, 30, speed_diff * 0.8 + 100], 45)
+                motor_speed_smoothing([speed_diff * 0.8 + 100, 40, 40, speed_diff * 0.8 + 100], 45)
         else:
             # go straight
             motor_speed_smoothing([100, 100, 100, 100], 60)
@@ -294,7 +294,7 @@ def position_event():
             motor_control(previous_angle_x, x_direction, is_target_lost)
 
             # override motor_control when target is found again
-            if target_lost_counter < 15 and is_target_lost == False:
+            if target_lost_counter < 10 and is_target_lost == False:
                 is_target_found_again = True
                 # print("smoothing motor speed start")
                 if servo_angle[0] < 80:
