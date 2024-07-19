@@ -21,7 +21,7 @@ frequencyA5s = 932
 frequencyB5 = 988
 frequencyC6 = 1047
 frequencyC6s = 1109
-frequencyC6sp = 1100
+frequencyC6sp = 1110
 frequencyD6 = 1175
 frequencyD6s = 1245
 frequencyE6 = 1319
@@ -37,7 +37,7 @@ pwm = GPIO.PWM(pinBuzzer, 100)  # Initialize PWM on pinBuzzer 100Hz frequency
 
 def play_tone(note, duration):
     pwm.ChangeFrequency(note)
-    pwm.start(25)  # 50% duty cycle
+    pwm.start(35)  # 50% duty cycle
     time.sleep(duration)
     pwm.stop()
     time.sleep(0.02)  # Short pause between notes
