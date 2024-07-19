@@ -526,8 +526,8 @@ def position_event():
 
         if servo_angle[1] > 180:
             servo_angle[1] = 180
-        if servo_angle[1] < 0:
-            servo_angle[1] = 0
+        if servo_angle[1] < 90:
+            servo_angle[1] = 90
 
         previous_angle_x = servo_angle[0]
         previous_angle_y = servo_angle[1]
