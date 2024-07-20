@@ -133,11 +133,11 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
                 # turn left
                 # add a coefficent
                 # motor_speed_smoothing([-100, speed_diff * 1 + 100, speed_diff * 1 + 100, -100], 200)
-                motor_speeds = [1, 200, 200, 1]
+                motor_speeds = [1, 230, 230, 1]
             else:
                 # turn right
                 # motor_speed_smoothing([speed_diff * 0.8 + 100, -100, -100, speed_diff * 0.8 + 100], 200)
-                motor_speeds = [200, 1, 1, 200]
+                motor_speeds = [230, 1, 1, 230]
         else:
             # go straight
             # motor_speed_smoothing([100, 100, 100, 100], 60)
