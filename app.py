@@ -113,9 +113,9 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
         search_counter += 1
         if search_counter > 5 and search_counter < 10:
             if x_direction == 1:
-                motor_speeds = [200, -200, -200, 200]
+                motor_speeds = [100, -100, -100, 100]
             elif x_direction == 2:
-                motor_speeds = [-200, 200, 200, -200]
+                motor_speeds = [-100, 100, 100, -100]
             else:
                 motor_speeds = [0, 0, 0, 0]
         elif search_counter == 10:
@@ -133,11 +133,11 @@ def motor_control(previous_angle_x, x_direction, is_target_lost=False):
                 # turn left
                 # add a coefficent
                 # motor_speed_smoothing([-100, speed_diff * 1 + 100, speed_diff * 1 + 100, -100], 200)
-                motor_speeds = [1, 255, 255, 1]
+                motor_speeds = [1, 150, 150, 1]
             else:
                 # turn right
                 # motor_speed_smoothing([speed_diff * 0.8 + 100, -100, -100, speed_diff * 0.8 + 100], 200)
-                motor_speeds = [255, 1, 1, 255]
+                motor_speeds = [150, 1, 1, 150]
         else:
             # go straight
             # motor_speed_smoothing([100, 100, 100, 100], 60)
@@ -308,7 +308,7 @@ def position_event():
                     #                        1 * target_lost_counter + 12 * fast_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * slow_side_coefficient), (4 * target_lost_counter + 35 * fast_side_coefficient)]
-                    motor_speeds = [170, -20, -20, 170]
+                    motor_speeds = [120, -20, -20, 120]
                 elif servo_angle[0] > 100:
                     # turn left
                     # motor_speed_smoothing([0,
@@ -317,7 +317,7 @@ def position_event():
                     #                        1 * target_lost_counter + 10 * slow_side_coefficient], 
                     #                        20)
                     # motor_speeds = [0, 0, int(1 * target_lost_counter + 20 * fast_side_coefficient), (4 * target_lost_counter + 30 * slow_side_coefficient)]
-                    motor_speeds = [-20, 170, 170, -20]
+                    motor_speeds = [-20, 120, 120, -20]
                 else:
                     motor_speeds = [80, 80, 80, 80]
                 target_lost_counter += 1
