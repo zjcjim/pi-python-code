@@ -64,7 +64,7 @@ def PID_Servo_Control(x, y):
     if is_target_destroyed or is_target_found_again:
         Kp = 0.55
     else:
-        Kp = 0.9
+        Kp = 0.7
     # 下面开始pid算法：
     # pid总公式：PID = Uk + KP*【E(k)-E(k-1)】 + KI*E(k) + KD*【E(k)-2E(k-1)+E(k-2)】 
     # 这里只用到了p，所以公式为：P = Uk + KP*【E(k)-E(k-1)】
@@ -354,8 +354,8 @@ def position_event():
 
         if servo_angle[1] > 180:
             servo_angle[1] = 180
-        if servo_angle[1] < 90:
-            servo_angle[1] = 90
+        if servo_angle[1] < 0:
+            servo_angle[1] = 0
 
         previous_angle_x = servo_angle[0]
         previous_angle_y = servo_angle[1]
